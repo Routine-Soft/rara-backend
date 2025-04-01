@@ -1,7 +1,7 @@
 ## Rara App
 
 ### Cadastro de usuário 1 - Comum
-Banco de dados: 
+Banco de dadoss: 
 - Nome Completo
 - Email
 - Whatsapp
