@@ -89,7 +89,7 @@ app.use('/', routerChristianGroup)
 // * ========== ROUTERS ======== *
 
 // Definindo a porta
-const port = 3000;
+const port = 8080;
 
 // Função que será executada quando o servidor ficar online
 // app.listen(port, '0.0.0.0', () => console.log(`Rodando com Express na porta ${port}`));

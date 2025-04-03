@@ -36,10 +36,6 @@ const userSchema = new mongoose.Schema({
         type: String, // Armazena o endereço do usuário
         required: false
     },
-    cg: {
-        type: String, // Referência à igreja
-        required: false,
-    },
     status: {
         type: String,
         required: false
@@ -55,11 +51,6 @@ const userSchema = new mongoose.Schema({
     resetPasswordExpires: {
         type: Date,
         required: false
-    },
-    id: {
-        type: Number,
-        required: false,
-        unique: false
     },
     batizado: {
         type: String,

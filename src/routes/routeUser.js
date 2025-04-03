@@ -52,9 +52,7 @@ routerUser.post('/user/criar', async (req, res) => {
         birthdate,
         endereco,
         igreja,
-        cg,
         status,
-        id,
         batizado,
         admin // Adiciona o campo admin
     } = req.body;
@@ -82,10 +80,8 @@ routerUser.post('/user/criar', async (req, res) => {
             gender,
             birthdate,
             endereco,
-            cg,
             igreja: validIgreja,
             status,
-            id,
             batizado,
             admin: admin || false // Define como falso se não for especificado
         });
@@ -126,7 +122,6 @@ routerUser.post('/user/criar', async (req, res) => {
                 birthdate: savedUser.birthdate,
                 endereco: savedUser.endereco,
                 igreja: savedUser.igreja,
-                cg: savedUser.cg,
                 status: savedUser.status,
                 batizado: savedUser.batizado,
                 admin: savedUser.admin,
@@ -185,10 +180,8 @@ routerUser.post('/user/login', async (req, res) => {
                 gender: user.gender,
                 birthdate: user.birthdate,
                 endereco: user.endereco,
-                cg: user.cg,
                 igreja: user.igreja,
                 status: user.status,
-                id: user.id,
                 batizado: user.batizado,
                 admin: user.admin
             }
