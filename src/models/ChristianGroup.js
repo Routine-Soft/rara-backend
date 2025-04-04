@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose'
 
 // Definindo o esquema para o ChristianGroup
 const christianGroupSchema = new mongoose.Schema({
@@ -27,4 +27,4 @@ const christianGroupSchema = new mongoose.Schema({
 // Criando o modelo a partir do esquema
 const ChristianGroup = mongoose.model('ChristianGroup', christianGroupSchema);
 
-module.exports = ChristianGroup;
+export default ChristianGroup;

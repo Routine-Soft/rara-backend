@@ -1,5 +1,5 @@
 //importing mongoose
-const mongoose = require('mongoose')
+import mongoose from 'mongoose'
 
 //Connecting MongoDB to Mongoose. Var with a function inside
 const connectMongoDBWithMongoose = async () => {
@@ -11,4 +11,4 @@ const connectMongoDBWithMongoose = async () => {
     }) 
 }
 
-module.exports = connectMongoDBWithMongoose
+export default connectMongoDBWithMongoose

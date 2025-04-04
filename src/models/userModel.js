@@ -1,5 +1,4 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
+import mongoose from 'mongoose'
 
 // Definindo o esquema do usuário
 const userSchema = new mongoose.Schema({
@@ -73,4 +72,4 @@ const userSchema = new mongoose.Schema({
 // Verifica se o modelo já foi definido
 const UserModel = mongoose.models.usuarios || mongoose.model('usuarios', userSchema);
 
-module.exports = UserModel;
+export default UserModel;

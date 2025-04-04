@@ -1,9 +1,9 @@
-const express = require('express');
-const dotenv = require('dotenv');
+import express from 'express'
+import dotenv from "dotenv"
 dotenv.config();
-const sendEmail = require('../routes/emailService');
-const crypto = require('crypto');
-const User = require('../models/userModel'); // Certifique-se de ajustar o caminho para o modelo de usuário
+import sendEmail from '../routes/emailService.js';
+import crypto from 'crypto'
+import UserModel from '../models/userModel.js';
 
 const routerResetPassword = express();
 routerResetPassword.use(express.json());
@@ -12,7 +12,7 @@ routerResetPassword.use(express.json());
 routerResetPassword.post('/request-reset-password', async (req, res) => {
     try {
         const { email } = req.body;
-        const user = await User.findOne({ email });
+        const user = await UserModel.findOne({ email });
 
         if (!user) {
             return res.status(404).json({message: 'Usuário não encontrado.'});
@@ -43,7 +43,7 @@ routerResetPassword.post('/request-reset-password', async (req, res) => {
 routerResetPassword.post('/first-access', async (req, res) => {
     try {
         const { email } = req.body;
-        const user = await User.findOne({ email });
+        const user = await UserModel.findOne({ email });
 
         if (!user) {
             return res.status(404).json({message: 'Usuário não encontrado.'});
@@ -76,7 +76,7 @@ routerResetPassword.post('/reset-password/:token', async (req, res) => {
         const { token } = req.params;
         const { password } = req.body;
 
-        const user = await User.findOne({
+        const user = await UserModel.findOne({
             resetPasswordToken: token,
             resetPasswordExpires: { $gt: Date.now() }
         });
@@ -97,4 +97,4 @@ routerResetPassword.post('/reset-password/:token', async (req, res) => {
     
 });
 
-module.exports = routerResetPassword
+export default routerResetPassword

@@ -1,13 +1,17 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose'
 
 // Definindo o schema para a Igreja
 const igrejaSchema = new mongoose.Schema({
-  nome: {
+  name: {
     type: String,
     required: true // Nome é obrigatório
   },
-  pastores: {
-    type: [String], // Array de strings para armazenar os nomes dos pastores
+  pastor1: {
+    type: String, // Array de strings para armazenar os nomes dos pastores
+    required: false
+  },
+  pastor2: {
+    type: String, // Array de strings para armazenar os nomes dos pastores
     required: false
   },
   pais: {
@@ -22,6 +26,10 @@ const igrejaSchema = new mongoose.Schema({
     type: String,
     required: true // Endereço é obrigatório
   },
+  cep: {
+    type: String,
+    required: true
+  },
   totalMembros: {
     type: Number,
     required: true, // Total de membros é obrigatório
@@ -32,4 +40,4 @@ const igrejaSchema = new mongoose.Schema({
 // Criando o modelo a partir do schema
 const Igreja = mongoose.model('Igreja', igrejaSchema);
 
-module.exports = Igreja;
+export default Igreja;

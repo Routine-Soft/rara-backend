@@ -1,6 +1,6 @@
-const express = require('express');
+import express from 'express'
 const routerCG = express.Router();
-const ChristianGroup = require('../models/ChristianGroup');
+import ChristianGroup from '../models/ChristianGroup.js';
 
 // Rota GET - Pega todos os grupos cristãos
 routerCG.get('/cd/buscar', async (req, res) => {
@@ -71,4 +71,4 @@ routerCG.delete('/cg/deletar/:id', async (req, res) => {
   }
 });
 
-module.exports = routerCG;
+export default routerCG;

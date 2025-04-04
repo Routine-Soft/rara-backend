@@ -1,6 +1,6 @@
-const nodemailer = require('nodemailer');
-const { SESClient, SendEmailCommand } = require('@aws-sdk/client-ses');
-const dotenv = require('dotenv');
+import nodemailer from 'nodemailer'
+import {SESClient, SendEmailCommand} from '@aws-sdk/client-ses'
+import dotenv from "dotenv"
 dotenv.config();
 
 // Configurar AWS SDK
@@ -14,7 +14,7 @@ const sesClient = new SESClient({
 
 // Criar o transporter do Nodemailer usando o SES
 let transporter = nodemailer.createTransport({
-    SES: { ses: sesClient, aws: require('@aws-sdk/client-ses') }
+    SES: { ses: sesClient }
 });
 
 const sendEmail = async (to, subject, body) => {
@@ -31,4 +31,4 @@ const sendEmail = async (to, subject, body) => {
     }
 };
 
-module.exports = sendEmail;
+export default sendEmail;

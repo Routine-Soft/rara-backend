@@ -1,7 +1,7 @@
-const express = require('express');
+import express from 'express'
 const routerIgreja = express.Router();
-const Igreja = require('../models/igrejasModel'); // Importa o modelo de Igreja
-const authenticateToken = require('../routes/middleware/authMiddleware'); // Importa o middleware de autenticação
+import Igreja from '../models/igrejasModel.js'
+import authenticateToken from '../routes/middleware/authMiddleware.js';
 
 // GET - Tudo
 routerIgreja.get('/igreja/buscar', async (req, res) => {
@@ -43,7 +43,7 @@ routerIgreja.get('/igreja/buscar/:id', async (req, res) => {
 });
 
 // POST - Criar Novo
-routerIgreja.post('/igreja/criar',  async (req, res) => {
+routerIgreja.post('/igreja/post',  async (req, res) => {
     try {
         const newIgreja = new Igreja(req.body);
         const savedIgreja = await newIgreja.save();
@@ -79,4 +79,4 @@ routerIgreja.delete('/igreja/deletar/:id', authenticateToken, async (req, res) =
     }
 });
 
-module.exports = routerIgreja;
+export default routerIgreja;

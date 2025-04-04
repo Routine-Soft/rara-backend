@@ -9,10 +9,9 @@ router.use(cors())
 
 import argon2 from 'argon2'
 
-const UserModel = require('../models/userModel');
+import UserModel from '../models/userModel.js'
 
-const authenticateToken = require('../routes/middleware/authMiddleware'); // Importe o middleware de autenticação
-
+import authenticateToken from '../routes/middleware/authMiddleware.js'
 
 // GET - Tudo
 router.get('/user/getall', async (req, res) => {
@@ -160,4 +159,4 @@ router.delete('/user/deletar/:id', authenticateToken, async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;

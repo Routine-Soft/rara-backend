@@ -3,19 +3,18 @@ import dotenv from "dotenv"
 dotenv.config();
 
 // Importando MongoDB + Mongoose
-const connectMongoDBWithMongoose = require('./src/database/connectMongoDBWithMongoose');
+import connectMongoDBWithMongoose from './src/database/connectMongoDBWithMongoose.js'
 connectMongoDBWithMongoose();
 
 // Importando Express e colocando dentro da constante "app"
-const express = require('express');
-const morgan = require('morgan'); // ajuda nas requisições HTTP mostrando tipo e tempo de resposta
+import express from 'express'
+import morgan from 'morgan'
 const app = express();
 app.use(express.json()); // sinalizando que receberá JSON
 app.use(express.urlencoded({ extended: true })); // facilita a parte de envio de arquivos
 app.use(morgan('dev'));
 
-
-const cors = require('cors'); // importando cors
+import cors from 'cors'
 const allowedOrigins = [
     '',
     '',
@@ -36,32 +35,22 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// Integrando o Socket.IO
-const http = require('http'); // Necessário para o servidor HTTP
-const server = http.createServer(app); // Criando o servidor HTTP com Express
-
 // * ========== ROUTERS ======== *
-const routerUser = require('./src/routes/routeUser')
+import routerUser from './src/routes/routeUser.js'
 app.use('/', routerUser)
 
-const routerIgreja = require('./src/routes/routerIgreja')
+import routerIgreja from './src/routes/routerIgreja.js'
 app.use('/', routerIgreja)
 
-const routerResetPassword = require('./src/routes/ResetPasswordRequest')
+import routerResetPassword from './src/routes/ResetPasswordRequest.js'
 app.use('/', routerResetPassword)
 
-const routerChristianGroup = require('./src/routes/routerChristianGroup')
+import routerChristianGroup from './src/routes/routerChristianGroup.js'
 app.use('/', routerChristianGroup)
-
 // * ========== ROUTERS ======== *
 
 // Definindo a porta
 const port = 8080;
 
 // Função que será executada quando o servidor ficar online
-// app.listen(port, '0.0.0.0', () => console.log(`Rodando com Express na porta ${port}`));
-server.listen(port, '0.0.0.0', () => {
-    console.log(`Rodando com Express na porta ${port}`);
-}).on('error', (err) => {
-    console.error('Erro ao iniciar o servidor:', err);
-});
+app.listen(port, '0.0.0.0', () => console.log(`Rodando com Express na porta ${port}`));
