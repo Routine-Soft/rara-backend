@@ -1,5 +1,5 @@
-// Importando dotenv
-const dotenv = require('dotenv');
+// Importing and initializing dotenv
+import dotenv from "dotenv"
 dotenv.config();
 
 // Importando MongoDB + Mongoose
@@ -39,39 +39,6 @@ app.use(cors(corsOptions));
 // Integrando o Socket.IO
 const http = require('http'); // Necessário para o servidor HTTP
 const server = http.createServer(app); // Criando o servidor HTTP com Express
-const socketIo = require('socket.io'); // Biblioteca para comunicação WebSocket
-const io = socketIo(server, {
-    cors: {
-        origin: '*', // Permitir todas as origens
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    },
-    transports: ['websocket', 'polling'], // Certifique-se de que o transporte do WebSocket está habilitado
-});
-
-
-io.on('connection', (socket) => {
-    console.log('Novo cliente conectado');
-
-    // Envia "ping" para os clientes conectados a cada 30 segundos
-    const pingInterval = setInterval(() => {
-        io.emit('ping');
-        console.log('Ping enviado para os clientes');
-    }, 30000); // Intervalo de 30 segundos
-
-    // Exemplo de evento customizado
-    socket.on('custom_event', (data) => {
-        console.log('Evento recebido:', data);
-    });
-
-    socket.on('disconnect', () => {
-        console.log('Cliente desconectado');
-        clearInterval(pingInterval); // Limpa o intervalo quando o cliente desconecta
-    });
-});
-
-
-// Tornando o Socket.IO disponível nas rotas
-app.set('io', io);
 
 // * ========== ROUTERS ======== *
 const routerUser = require('./src/routes/routeUser')

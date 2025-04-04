@@ -1,25 +1,21 @@
-const express = require('express');
-const routerUser = express();
-const UserModel = require('../models/userModel');
-const authenticateToken = require('../routes/middleware/authMiddleware'); // Importe o middleware de autenticação
-const cors = require('cors')
-routerUser.use(cors())
-//importing bcrypt
-const bcrypt = require('bcrypt')
-//importing JWT
-const jwt = require('jsonwebtoken')
-//importing BodyParser
-const bodyParser = require('body-parser')
-//signaling that it will be receive JSON
-const cookieParser = require("cookie-parser") 
+import express from 'express'
+const router = express.Router()
 
-routerUser.use(cors());
-routerUser.use(bodyParser.json())
-routerUser.use(cookieParser())
+router.use(express.json())
+router.use(express.urlencoded({extended: true}))
+
+import cors from 'cors'
+router.use(cors())
+
+import argon2 from 'argon2'
+
+const UserModel = require('../models/userModel');
+
+const authenticateToken = require('../routes/middleware/authMiddleware'); // Importe o middleware de autenticação
 
 
 // GET - Tudo
-routerUser.get('/user/buscar/', async (req, res) => {
+router.get('/user/getall', async (req, res) => {
     try {
         const users = await UserModel.find();
         res.status(200).json(users);
@@ -29,50 +25,25 @@ routerUser.get('/user/buscar/', async (req, res) => {
 });
 
 // GET - Por Id
-routerUser.get('/user/buscar/:id', async (req, res) => {
+router.get('/user/get/:userid', async (req, res) => {
     try {
-        const user = await UserModel.findById(req.params.id);
+        const userId = req.params.id
+        const user = await UserModel.findById(userId);
+
         if (!user) {
-            return res.status(404).json({ message: 'Usuário não encontrado' });
+            return res.status(401).json({ message: 'Usuário não encontrado' });
         }
-        res.status(200).json(user);
+
+        return res.status(200).json(user);
     } catch (error) {
-        res.status(500).json({ message: 'Erro ao obter usuário', error });
+        return res.status(500).json({ message: 'Erro ao obter usuário', error });
     }
 });
 
 // ==================== CADASTRAR USUÁRIO ====================
-routerUser.post('/user/criar', async (req, res) => {
-    const {
-        name,
-        whatsapp,
-        email,
-        password,
-        gender,
-        birthdate,
-        endereco,
-        igreja,
-        status,
-        batizado,
-        admin // Adiciona o campo admin
-    } = req.body;
-
+router.post('/user/post', async (req, res) => {
     try {
-        // Verifique se o e-mail já existe
-        const existingUser = await UserModel.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({ message: 'Email já existe' });
-        }
-
-        // Criptografe a senha do usuário
-        //const hashedPassword = await bcrypt.hash(password, 10);
-
-        // Trate valores vazios
-        //const validMinisterio = ministerio ? ministerio : null;
-        const validIgreja = igreja ? igreja : null;
-
-        // Crie o novo usuário
-        const newUser = new UserModel({
+        const {
             name,
             whatsapp,
             email,
@@ -80,122 +51,91 @@ routerUser.post('/user/criar', async (req, res) => {
             gender,
             birthdate,
             endereco,
-            igreja: validIgreja,
+            igreja,
+            status,
+            batizado,
+            admin
+        } = req.body;
+
+        // Verifique se o e-mail já existe
+        const existingUser = await UserModel.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: 'Usuário já existe' });
+        }
+
+        // Hash password with Argon2
+        const hashedPassword = await argon2.hash(password)
+
+        // Create user on MongoDB
+        const newUser = new UserModel({
+            name,
+            whatsapp,
+            email,
+            password: hashedPassword,
+            gender,
+            birthdate,
+            endereco,
+            igreja,
             status,
             batizado,
             admin: admin || false // Define como falso se não for especificado
         });
+        
+        await newUser.save();
 
-        // Salve o usuário no banco de dados
-        const savedUser = await newUser.save();
-
-        // // Envie a resposta com sucesso
-        // res.status(201).json({
-        //     message: 'Usuário registrado com sucesso',
-        //     user: {
-        //         _id: savedUser._id,
-        //         name,
-        //         whatsapp,
-        //         email,
-        //         gender,
-        //         birthdate,
-        //         endereco,
-        //         cg,
-        //         igreja: savedUser.igreja,
-        //         status,
-        //         id,
-        //         password,
-        //         batizado,
-        //         admin: savedUser.admin
-        //     }
-        // });
-
-        // Envia evento de WebSocket para clientes conectados
-        req.app.get('io').emit('new_user', {
-            event: 'new_user',
-            user: {
-                _id: savedUser._id,
-                name: savedUser.name,
-                whatsapp: savedUser.whatsapp,
-                email: savedUser.email,
-                gender: savedUser.gender,
-                birthdate: savedUser.birthdate,
-                endereco: savedUser.endereco,
-                igreja: savedUser.igreja,
-                status: savedUser.status,
-                batizado: savedUser.batizado,
-                admin: savedUser.admin,
-                createdAt: savedUser.createdAt,
-            },
-        });
-
-        res.status(201).json({
-            message: 'Usuário registrado com sucesso',
-            user: savedUser,
-        });
+        return res.status(200).json({message: 'Usuário criado com sucesso', user: newUser})
     } catch (error) {
-        console.error('Erro ao criar usuário:', error);
-        res.status(500).json({ message: 'Erro ao criar usuário', error });
+        res.status(500).json({ message: 'Erro ao criar usuário', error: error.message });
     }
 });
 
 // ==================== LOGIN ====================
-routerUser.post('/user/login', async (req, res) => {
-    const { email, password } = req.body;
-
+router.post('/user/login', async (req, res) => {
     try {
-        // Verifique se o e-mail e a senha foram fornecidos
-        if (!email || !password) {
-            return res.status(400).json({ message: 'E-mail e senha são obrigatórios' });
+        const { email, password } = req.body;
+
+        // Verify if user exist
+        const existingUser = await UserModel.findOne({email})
+        if (!existingUser) {
+            return res.status(401).json({message: 'usuário não encontrado'})
         }
 
-        // Encontre o usuário pelo e-mail
-        const user = await UserModel.findOne({ email });
-        
-        // Verifique se o usuário foi encontrado
-        if (!user) {
-            return res.status(404).json({ message: 'Usuário não encontrado' });
+        // Verify password with Argon2
+        const isPasswordValid = await argon2.verify(existingUser.password, password)
+        if (!isPasswordValid) {
+            return res.status(400).json({message: 'Senha incorreta'})
         }
 
-        // ATENÇÃO: A senha não está sendo salva com criptografia
+        // Monta os dados do usuário para enviar ao frontend
+        const userData = {
+            _id: existingUser._id,
+            name: existingUser.name,
+            whatsapp: existingUser.whatsapp,
+            email: existingUser.email,
+            gender: existingUser.gender,
+            birthdate: existingUser.birthdate,
+            endereco: existingUser.endereco,
+            igreja: existingUser.igreja,
+            status: existingUser.status,
+            batizado: existingUser.batizado,
+            admin: existingUser.admin
+        };
 
-        // // Verifique se a senha fornecida é correta
-        // const isMatch = await bcrypt.compare(password, user.password);
-        // if (!isMatch) {
-        //     return res.status(401).json({ message: 'Senha incorreta' });
-        // }
+        // Create token with JWT
+        const secretKey = 'chave1995'
+        const token = jwt.sign({email, isPasswordValid}, secretKey, {expiresIn: '100h'})
 
-        // Gere um token JWT
-        const token = jwt.sign({ userId: user._id }, process.env.SECRETKEY_BCRYPT,);
-
-        // Envie a resposta com o token
-        res.status(200).json({
-            message: 'Login feito com sucesso',
-            token,
-            user: {
-                _id: user._id,
-                name: user.name,
-                whatsapp: user.whatsapp,
-                email: user.email,
-                gender: user.gender,
-                birthdate: user.birthdate,
-                endereco: user.endereco,
-                igreja: user.igreja,
-                status: user.status,
-                batizado: user.batizado,
-                admin: user.admin
-            }
-        });
+        //Return response with token
+        return res.json({auth: true, token, user: userData})
     } catch (error) {
         console.error('Erro ao fazer login:', error);
-        res.status(500).json({ message: 'Erro no servidor ao fazer login', error });
+        res.status(500).json({ message: 'Erro no servidor ao fazer login', error: error.message });
     }
 });
 
 
-
 // PATCH - Atualizar Por Id
-routerUser.patch('/user/editar/:id', authenticateToken, async (req, res) => {
+router.patch('/user/editar/:id', authenticateToken, async (req, res) => {
     try {
         const updatedUser = await UserModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!updatedUser) {
@@ -208,7 +148,7 @@ routerUser.patch('/user/editar/:id', authenticateToken, async (req, res) => {
 });
 
 // DELETE - Por Id
-routerUser.delete('/user/deletar/:id', authenticateToken, async (req, res) => {
+router.delete('/user/deletar/:id', authenticateToken, async (req, res) => {
     try {
         const deletedUser = await UserModel.findByIdAndDelete(req.params.id);
         if (!deletedUser) {
@@ -220,4 +160,4 @@ routerUser.delete('/user/deletar/:id', authenticateToken, async (req, res) => {
     }
 });
 
-module.exports = routerUser;
+module.exports = router;

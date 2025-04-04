@@ -1,22 +1,21 @@
-const jwt = require('jsonwebtoken');
-const secretKey = process.env.SECRETKEY_BCRYPT; // Chave secreta para assinar e verificar o token
+import jwt from 'jsonwebtoken'
+const secretkey = process.env.SECRET_KEY
 
 const authenticateToken = (req, res, next) => {
-  const token = req.headers.authorization;
+    const token = req.headers.authorization
 
-  if (!token) {
-    return res.status(401).json({ message: 'Token não fornecido' });
-  }
-
-  jwt.verify(token, secretKey, (err, decoded) => {
-    if (err) {
-      return res.status(401).json({ message: 'Token inválido' });
+    if (!token) {
+        return res.status(401).json({message: 'Token não fornecido'})
     }
-    
-    // Se o token for válido, armazena as informações decodificadas do usuário no req.user
-    req.user = decoded;
-    next(); // Chama o próximo middleware ou rota handler
-  });
-};
 
-module.exports = authenticateToken;
+    jwt.verify(token, secretkey, (error, decoded) => {
+        if (error) {
+            return res.status(401).json({message: 'Token Inválido'})
+        }
+
+        req.user = decoded
+        next()
+    })
+} 
+
+export default authenticateToken
