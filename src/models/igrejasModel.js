@@ -22,17 +22,17 @@ const igrejaSchema = new mongoose.Schema({
     type: String,
     required: true // Estado é obrigatório
   },
-  endereco: {
+  endereço: {
     type: String,
     required: true // Endereço é obrigatório
   },
   cep: {
     type: String,
-    required: true
+    required: false
   },
   totalMembros: {
     type: Number,
-    required: true, // Total de membros é obrigatório
+    required: false, // Total de membros é obrigatório
     default: 0      // Valor padrão é 0
   }
 });
