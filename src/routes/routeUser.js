@@ -13,6 +13,8 @@ import UserModel from '../models/userModel.js'
 
 import authenticateToken from '../routes/middleware/authMiddleware.js'
 
+import jwt from 'jsonwebtoken'
+
 // GET - Tudo
 router.get('/user/getall', async (req, res) => {
     try {
@@ -55,6 +57,7 @@ router.post('/user/post', async (req, res) => {
             batizado,
             admin
         } = req.body;
+        console.log('resultado: ', req.body)
 
         // Verifique se o e-mail já existe
         const existingUser = await UserModel.findOne({ email });
@@ -121,8 +124,8 @@ router.post('/user/login', async (req, res) => {
         };
 
         // Create token with JWT
-        const secretKey = 'chave1995'
-        const token = jwt.sign({email, isPasswordValid}, secretKey, {expiresIn: '100h'})
+        const secretKey = process.env.SECRET_KEY
+        const token = jwt.sign({email, isPasswordValid}, secretKey, {expiresIn: '20m'})
 
         //Return response with token
         return res.json({auth: true, token, user: userData})

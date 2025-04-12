@@ -4,7 +4,7 @@ import Igreja from '../models/igrejasModel.js'
 import authenticateToken from '../routes/middleware/authMiddleware.js';
 
 // GET - Tudo
-routerIgreja.get('/igreja/getall', async (req, res) => {
+routerIgreja.get('/igreja/getall', authenticateToken, async (req, res) => {
     try {
         const igrejas = await Igreja.find();
         res.status(200).json(igrejas);
@@ -14,7 +14,7 @@ routerIgreja.get('/igreja/getall', async (req, res) => {
 });
 
 // Rota para buscar uma igreja específica com seus ministérios e usuários pelo nome
-routerIgreja.get('/igreja/get/:nome', async (req, res) => {
+routerIgreja.get('/igreja/get/:nome', authenticateToken, async (req, res) => {
     try {
       const igreja = await Igreja.findOne({ nome: req.params.nome });
       if (!igreja) {
@@ -30,7 +30,7 @@ routerIgreja.get('/igreja/get/:nome', async (req, res) => {
   });
 
 // GET - Por Id
-routerIgreja.get('/igreja/get/:igrejaid', async (req, res) => {
+routerIgreja.get('/igreja/get/:igrejaid', authenticateToken, async (req, res) => {
     try {
         const igreja = await Igreja.findById(req.params.id);
         if (!igreja) {
@@ -43,7 +43,7 @@ routerIgreja.get('/igreja/get/:igrejaid', async (req, res) => {
 });
 
 // POST - Criar Novo
-routerIgreja.post('/igreja/post',  async (req, res) => {
+routerIgreja.post('/igreja/post', authenticateToken,  async (req, res) => {
     try {
         const {name, pastor1, pastor2, pais, estado, endereço, cep, totalMembros} = req.body;
 

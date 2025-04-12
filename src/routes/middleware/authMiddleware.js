@@ -1,8 +1,11 @@
-import jwt from 'jsonwebtoken'
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv'
+dotenv.config()
 const secretkey = process.env.SECRET_KEY
 
 const authenticateToken = (req, res, next) => {
     const token = req.headers.authorization
+    console.log('token: ', token)
 
     if (!token) {
         return res.status(401).json({message: 'Token não fornecido'})
