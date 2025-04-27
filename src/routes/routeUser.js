@@ -16,9 +16,10 @@ import authenticateToken from '../routes/middleware/authMiddleware.js'
 import jwt from 'jsonwebtoken'
 
 // GET - Tudo
-router.get('/user/getall', async (req, res) => {
+router.get('/user/getall', authenticateToken, async (req, res) => {
     try {
-        const users = await UserModel.find();
+        const igreja = req.user.igreja;
+        const users = await UserModel.find({igreja});
         res.status(200).json(users);
     } catch (error) {
         res.status(500).json({ message: 'Erro ao obter usuários', error });
@@ -26,9 +27,9 @@ router.get('/user/getall', async (req, res) => {
 });
 
 // GET - Por Id
-router.get('/user/get/:userid', async (req, res) => {
+router.get('/user/get/:userid', authenticateToken, async (req, res) => {
     try {
-        const userId = req.params.id
+        const userId = req.params.userid; // corrigido aqui
         const user = await UserModel.findById(userId);
 
         if (!user) {
@@ -120,12 +121,12 @@ router.post('/user/login', async (req, res) => {
             igreja: existingUser.igreja,
             status: existingUser.status,
             batizado: existingUser.batizado,
-            admin: existingUser.admin
+            admin: existingUser.admin, 
         };
 
         // Create token with JWT
         const secretKey = process.env.SECRET_KEY
-        const token = jwt.sign({email, isPasswordValid}, secretKey, {expiresIn: '20m'})
+        const token = jwt.sign({email: existingUser.email, igreja: existingUser.igreja, _id: existingUser._id, isPasswordValid}, secretKey, {expiresIn: '1h'})
 
         //Return response with token
         return res.json({auth: true, token, user: userData})
@@ -135,17 +136,41 @@ router.post('/user/login', async (req, res) => {
     }
 });
 
-
-// PATCH - Atualizar Por Id
-router.patch('/user/editar/:id', authenticateToken, async (req, res) => {
+// PATCH - Atualizar usuário por ID
+router.patch('/user/patch/:id', authenticateToken, async (req, res) => {
     try {
-        const updatedUser = await UserModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (!updatedUser) {
-            return res.status(404).json({ message: 'Usuário não encontrado' });
+      const userId = req.params.id;
+      const updateData = { ...req.body };
+  
+      // Verificação básica se há dados para atualizar
+      if (!updateData || Object.keys(updateData).length === 0) {
+        return res.status(400).json({ message: 'Dados de atualização não fornecidos' });
+      }
+
+        // Se a senha estiver sendo atualizada, criptografa com argon2
+        if (updateData.password) {
+            updateData.password = await argon2.hash(updateData.password);
         }
-        res.status(200).json(updatedUser);
+  
+      // Atualiza o usuário e retorna o novo documento com { new: true }
+      const updatedUser = await UserModel.findByIdAndUpdate(userId, updateData, {
+        new: true,
+        runValidators: true, // Garante que validações do schema sejam aplicadas
+      });
+  
+      if (!updatedUser) {
+        return res.status(404).json({ message: 'Usuário não encontrado' });
+      }
+  
+      res.status(200).json({
+        message: 'Usuário atualizado com sucesso',
+        user: updatedUser,
+      });
     } catch (error) {
-        res.status(500).json({ message: 'Erro ao atualizar usuário', error });
+      res.status(500).json({
+        message: 'Erro ao atualizar usuário',
+        error: error.message,
+      });
     }
 });
 
@@ -161,5 +186,33 @@ router.delete('/user/deletar/:id', authenticateToken, async (req, res) => {
         res.status(500).json({ message: 'Erro ao deletar usuário', error });
     }
 });
+
+// PATCH - Adiciona um item ao array (Reset, Start ou CDV)
+router.patch('/user/addToArray/:id', authenticateToken, async (req, res) => {
+    try {
+        const { field, value } = req.body; // exemplo: { field: "reset", value: "novoValor" }
+
+        // Validação básica
+        const validFields = ['reset', 'start', 'cdv'];
+        if (!validFields.includes(field)) {
+            return res.status(400).json({ message: 'Campo inválido' });
+        }
+
+        const updatedUser = await UserModel.findByIdAndUpdate(
+            req.params.id,
+            { $addToSet: { [field]: value } },
+            { new: true }
+        );
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: 'Usuário não encontrado' });
+        }
+
+        res.status(200).json({ message: `${field} atualizado com sucesso`, user: updatedUser });
+    } catch (error) {
+        res.status(500).json({ message: 'Erro ao atualizar array', error: error.message });
+    }
+});
+
 
 export default router;

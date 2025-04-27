@@ -2,72 +2,33 @@ import mongoose from 'mongoose'
 
 // Definindo o esquema do usuário
 const userSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: false
+    name: { type: String, required: false },
+    whatsapp: { type: String, required: false },
+    email: { type: String, required: false, unique: true },
+    password: { type: String, required: false },
+    gender: { type: String, required: false },
+    birthdate: { type: String, required: false },
+    igreja: { type: String, required: false },
+    endereco: { type: String, required: false },
+    status: { type: String, required: false },
+    token: { type: String, required: false },
+    resetPasswordToken: { type: String, required: false },
+    resetPasswordExpires: { type: Date, required: false },
+    batizado: { type: String, required: false },
+    admin: { type: String, required: false },
+    reset: {
+        type: [String],
+        default: []
     },
-    whatsapp: {
-        type: String,
-        required: false
+    start: {
+        type: [String],
+        default: []
     },
-    email: {
-        type: String,
-        required: false,
-        unique: true // Tornar o email único
-    },
-    password: {
-        type: String,
-        required: false
-    },
-    gender: {
-        type: String,
-        required: false
-    },
-    birthdate: {
-        type: String, // Armazena a data de nascimento
-        required: false
-    },
-    igreja: {
-        type: String, // Referência à igreja
-        required: false,
-    },
-    endereco: {
-        type: String, // Armazena o endereço do usuário
-        required: false
-    },
-    status: {
-        type: String,
-        required: false
-    },
-    token: {
-        type: String,
-        required: false
-    },
-    resetPasswordToken: {
-        type: String,
-        required: false
-    },
-    resetPasswordExpires: {
-        type: Date,
-        required: false
-    },
-    batizado: {
-        type: String,
-        riquired: false,
-    },
-    admin: {
-        type: String, 
-        riquired: false,
+    cdv: {
+        type: [String],
+        default: []
     }
 }, { timestamps: true });
-
-// // Middleware de hashing de senha antes de salvar
-// userSchema.pre('save', async function (next) {
-//     if (!this.isModified('password')) return next();
-//     const salt = await bcrypt.genSalt(10);
-//     this.password = await bcrypt.hash(this.password, salt);
-//     next();
-// });
 
 // Verifica se o modelo já foi definido
 const UserModel = mongoose.models.usuarios || mongoose.model('usuarios', userSchema);
