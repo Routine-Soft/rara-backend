@@ -4,7 +4,7 @@ import Igreja from '../models/igrejasModel.js'
 import authenticateToken from '../routes/middleware/authMiddleware.js';
 
 // GET - Tudo
-routerIgreja.get('/igreja/getall', authenticateToken, async (req, res) => {
+routerIgreja.get('/igreja/getall', async (req, res) => {
     try {
         const igrejas = await Igreja.find();
         res.status(200).json(igrejas);

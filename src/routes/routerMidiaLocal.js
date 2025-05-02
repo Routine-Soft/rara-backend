@@ -35,7 +35,7 @@ router.post('/midiaLocal/post', authenticateToken, async (req, res) => {
 router.get('/midiaLocal/get', authenticateToken, async (req, res) => {
   try {
     const igreja = req.user.igreja;
-    const midias = await MidiaLocalModel.find().sort({ createdAt: -1 }); // Lista mais recentes primeiro
+    const midias = await MidiaLocalModel.find({igreja}).sort({ createdAt: -1 }); // Lista mais recentes primeiro
     res.status(200).json(midias);
   } catch (error) {
     res.status(500).json({ message: 'Erro ao buscar mídias', error: error.message });
