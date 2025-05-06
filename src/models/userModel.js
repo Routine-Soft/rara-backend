@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import argon2 from 'argon2'
 
 // Definindo o esquema do usuário
 const userSchema = new mongoose.Schema({
@@ -27,8 +28,14 @@ const userSchema = new mongoose.Schema({
     cdv: {
         type: [String],
         default: []
-    }
+    },
 }, { timestamps: true });
+
+userSchema.pre('save', async function (next) {
+    if (!this.isModified('password')) return next();
+    this.password = await argon2.hash(this.password);
+    next();
+});
 
 // Verifica se o modelo já foi definido
 const UserModel = mongoose.models.usuarios || mongoose.model('usuarios', userSchema);

@@ -14,6 +14,22 @@ import UserModel from '../models/userModel.js'
 import authenticateToken from '../routes/middleware/authMiddleware.js'
 
 import jwt from 'jsonwebtoken'
+import { v4 as uuidv4 } from 'uuid'
+// import AWS from 'aws-sdk'
+import {  SESClient, SendEmailCommand } from '@aws-sdk/client-ses'
+
+import dotenv from 'dotenv'
+dotenv.config()
+
+const sesClient = new SESClient({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
+});
+
+// const ses = new AWS.SES({ region: process.env.AWS_REGION });
 
 // GET - Tudo
 router.get('/user/getall', authenticateToken, async (req, res) => {
@@ -74,7 +90,7 @@ router.post('/user/post', async (req, res) => {
             name,
             whatsapp,
             email,
-            password: hashedPassword,
+            password,
             gender,
             birthdate,
             endereco,
@@ -214,5 +230,76 @@ router.patch('/user/addToArray/:id', authenticateToken, async (req, res) => {
     }
 });
 
+router.post('/user/forgot-password', async (req, res) => {
+    const { email } = req.body;
+    console.log('email: ', email)
+    try {
+      console.log('email: ', email)
+      const user = await UserModel.findOne({ email });
+      if (!user) return res.status(404).json({ message: 'Usuário não encontrado' });
+  
+      const rawToken = uuidv4();
+      const hashedToken = await argon2.hash(rawToken);
+      const expires = Date.now() + 1000 * 60 * 60; // 1h
+  
+      user.resetPasswordToken = hashedToken;
+      user.resetPasswordExpires = expires;
+      await user.save();
+  
+      const resetLink = `${process.env.FRONTEND_URL}/reset-password/${encodeURIComponent(rawToken)}`;
+  
+      const command = new SendEmailCommand({
+        Source: process.env.EMAIL_FROM,
+        Destination: { ToAddresses: [email] },
+        Message: {
+          Subject: { Data: 'Redefinição de Senha' },
+          Body: {
+            Html: {
+              Data: `
+                <p>Olá,</p>
+                <p>Clique no link abaixo para redefinir sua senha:</p>
+                <p><a href="${resetLink}">${resetLink}</a></p>
+                <p>O link expira em 1 hora.</p>
+              `
+            }
+          }
+        }
+      });
+  
+      await sesClient.send(command);
+      res.json({ message: 'E-mail enviado com sucesso!' });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Erro ao enviar e-mail' });
+    }
+});
+
+router.post('/reset-password', async (req, res) => {
+    const { token, password } = req.body;
+  
+    try {
+      const user = await UserModel.findOne({
+        resetPasswordExpires: { $gt: Date.now() },
+      });
+  
+      if (!user || !user.resetPasswordToken)
+        return res.status(400).json({ message: 'Token inválido ou expirado' });
+  
+      const tokenIsValid = await argon2.verify(user.resetPasswordToken, token);
+      if (!tokenIsValid)
+        return res.status(400).json({ message: 'Token inválido ou expirado' });
+  
+      user.password = password; // será hasheado no model com argon2
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpires = undefined;
+      await user.save();
+  
+      res.json({ message: 'Senha redefinida com sucesso!' });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Erro ao redefinir a senha' });
+    }
+});
+  
 
 export default router;
