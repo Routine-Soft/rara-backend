@@ -1,4 +1,4 @@
-// Importing and initializing dotenv
+// Importing and initializing the dotenv
 import dotenv from "dotenv"
 dotenv.config();
 
