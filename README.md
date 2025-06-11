@@ -1,4 +1,5 @@
 ## Rara App
+teste
 
 ### Cadastro de usuário 1 - Comum
 Banco de dadoss: 
