@@ -17,7 +17,7 @@ app.use(morgan('dev'));
 import cors from 'cors'
 const allowedOrigins = [
     '',
-    'https://rara.cestsegtrabalho.com.br',
+    'https://api.comunhaorara.com',
     'http://localhost:3000'
 ];
 // Incluir site vercel que iriei criar
