@@ -50,6 +50,9 @@ app.use('/', routerChristianGroup)
 
 import routerMidiaLocal from './src/routes/routerMidiaLocal.js'
 app.use('/', routerMidiaLocal)
+
+import ResetPasswordRequest from './src/routes/ResetPasswordRequest.js'
+app.use('/', ResetPasswordRequest)
 // * ========== ROUTERS ======== *
 
 // Definindo a porta

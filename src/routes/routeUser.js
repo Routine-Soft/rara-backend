@@ -142,7 +142,7 @@ router.post('/user/login', async (req, res) => {
 
         // Create token with JWT
         const secretKey = process.env.SECRET_KEY
-        const token = jwt.sign({email: existingUser.email, igreja: existingUser.igreja, _id: existingUser._id, isPasswordValid}, secretKey, {expiresIn: '1h'})
+        const token = jwt.sign({email: existingUser.email, igreja: existingUser.igreja, _id: existingUser._id, isPasswordValid}, secretKey, {expiresIn: '7d'})
 
         //Return response with token
         return res.json({auth: true, token, user: userData})
