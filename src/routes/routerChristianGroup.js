@@ -5,8 +5,8 @@ router.use(express.urlencoded({extended: true}))
 import cors from 'cors'
 router.use(cors())
 
-import ChristianGroup from '../models/ChristianGroup';
-import authenticateToken from './middleware/authMiddleware';
+import ChristianGroup from '../models/ChristianGroup.js';
+import authenticateToken from './middleware/authMiddleware.js';
 
 // Rota POST - Cria um novo grupo cristão
 router.post('/cg/post', authenticateToken, async (req, res) => {
