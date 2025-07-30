@@ -1,74 +1,78 @@
-import express from 'express'
-const routerCG = express.Router();
-import ChristianGroup from '../models/ChristianGroup.js';
+import express from 'express';
+const router = express.Router();
+router.use(express.json())
+router.use(express.urlencoded({extended: true}))
+import cors from 'cors'
+router.use(cors())
 
-// Rota GET - Pega todos os grupos cristãos
-routerCG.get('/cd/buscar', async (req, res) => {
-  try {
-    const groups = await ChristianGroup.find();
-    res.status(200).json(groups);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// Rota GET - Pega um grupo cristão específico pelo ID
-routerCG.get('/cg/buscar:id', async (req, res) => {
-  try {
-    const group = await ChristianGroup.findById(req.params.id);
-    if (!group) {
-      return res.status(404).json({ message: 'Grupo não encontrado' });
-    }
-    res.status(200).json(group);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
+import ChristianGroup from '../models/ChristianGroup';
+import authenticateToken from './middleware/authMiddleware';
 
 // Rota POST - Cria um novo grupo cristão
-routerCG.post('/cg/criar', async (req, res) => {
-  const { nome, endereco, lider, colider, anfitriao} = req.body;
-
-  const newGroup = new ChristianGroup({
-    nome,
-    endereco,
-    lider,
-    colider,
-    anfitriao,
-  });
-
+router.post('/cg/post', authenticateToken, async (req, res) => {
   try {
-    const savedGroup = await newGroup.save();
-    res.status(201).json(savedGroup);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
+    const { nome, endereco, lider, colider, anfitriao, contato, img, igreja} = req.body;
+
+    const newGroup = new ChristianGroup({
+      nome,
+      endereco,
+      lider,
+      colider,
+      anfitriao,
+      contato,
+      img,
+      igreja
+    });
+
+    await newGroup.save();
+    res.status(201).json({message: 'CG criado com sucesso', cg: newGroup});
+  } catch (error) {
+    res.status(400).json({ message: 'Erro ao criar CG', error: error.message });
+  }
+});
+
+// Rota GET - Pega todos os grupos cristãos
+router.get('/cg/get', authenticateToken, async (req, res) => {
+  try {
+    const igreja = req.user.igreja;
+    const groups = await ChristianGroup.find({igreja}).sort({createdAt: -1});
+    res.status(200).json(groups);
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao buscar mídia', error: error.message });
   }
 });
 
 // Rota PATCH - Atualiza um grupo cristão existente
-routerCG.patch('/cg/editar/:id', async (req, res) => {
+router.patch('/cg/patch/:id', authenticateToken, async (req, res) => {
   try {
-    const updatedGroup = await ChristianGroup.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const { id } = req.params;
+    const updateData = req.body;
+
+    const updatedGroup = await ChristianGroup.findByIdAndUpdate(id, updateData, { new: true, runValidators: true, });
+
     if (!updatedGroup) {
-      return res.status(404).json({ message: 'Grupo não encontrado' });
+      return res.status(404).json({ message: 'CG não encontrado' });
     }
-    res.status(200).json(updatedGroup);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
+
+    res.status(200).json({message: 'CG atualizado com sucesso!', cg: updatedGroup});
+  } catch (error) {
+    res.status(400).json({ message: 'Erro ao atualizar CG', error: error.message });
   }
 });
 
 // Rota DELETE - Deleta um grupo cristão pelo ID
-routerCG.delete('/cg/deletar/:id', async (req, res) => {
+router.delete('/cg/delete/:id', async (req, res) => {
   try {
-    const group = await ChristianGroup.findByIdAndDelete(req.params.id);
+    const { id } = req.params;
+    const group = await ChristianGroup.findByIdAndDelete(id);
+
     if (!group) {
-      return res.status(404).json({ message: 'Grupo não encontrado' });
+      return res.status(404).json({ message: 'CG não encontrado' });
     }
-    res.status(200).json({ message: 'Grupo deletado com sucesso' });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(200).json({ message: 'CG deletado com sucesso' });
+  } catch (error) {
+    res.status(500).json({ message: 'Erro ao deletar CG', error: error.message });
   }
 });
 
-export default routerCG;
+export default router;

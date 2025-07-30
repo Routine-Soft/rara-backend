@@ -8,8 +8,6 @@ router.use(cors())
 import MidiaLocalModel from '../models/midiaLocalModel.js';
 import authenticateToken from './middleware/authMiddleware.js';
 
-
-
 // ==================== CREATE ====================
 router.post('/midiaLocal/post', authenticateToken, async (req, res) => {
   try {

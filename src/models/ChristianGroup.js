@@ -20,8 +20,20 @@ const christianGroupSchema = new mongoose.Schema({
   },
   anfitriao: {
     type: String,
-    required: true // Nome do anfitrião é obrigatório
+    required: false // Nome do anfitrião é obrigatório
   },
+  contato: {
+    type: String,
+    required: false
+  },
+  img: {
+    type: String,
+    required: false
+  },
+  igreja: {
+    type: String,
+    required: false
+  }
 }, { timestamps: true });
 
 // Criando o modelo a partir do esquema
