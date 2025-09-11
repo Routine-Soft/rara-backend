@@ -18,6 +18,8 @@ import cors from 'cors'
 const allowedOrigins = [
     '',
     'https://api.comunhaorara.com',
+    'https://app.cestsegrabalho.com.br',
+    'https://cestsegrabalho.com.br',
     'http://localhost:3000'
 ];
 // Incluir site vercel que iriei criar
