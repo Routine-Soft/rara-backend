@@ -58,7 +58,7 @@ app.use('/', ResetPasswordRequest)
 // * ========== ROUTERS ======== *
 
 // Definindo a porta
-const port = 8080;
+const port = 8081;
 
 // Função que será executada quando o servidor ficar online
 app.listen(port, '0.0.0.0', () => console.log(`Rodando com Express na porta ${port}`));
