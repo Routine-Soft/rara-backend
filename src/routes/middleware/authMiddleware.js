@@ -1,23 +1,22 @@
-import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv'
-dotenv.config()
-const secretkey = process.env.SECRET_KEY
+import jwt from 'jsonwebtoken'
+import AppError from '../../errors/AppError.js'
 
-const authenticateToken = (req, res, next) => {
-    const token = req.headers.authorization
+export async function authenticate(req, reply) {
+    const authHeader = req.headers.authorization
 
-    if (!token) {
-        return res.status(401).json({message: 'Token não fornecido'})
+    if (!authHeader) {
+        throw new AppError('Token not provided', 401)
     }
 
-    jwt.verify(token, secretkey, (error, decoded) => {
-        if (error) {
-            return res.status(403).json({message: 'Token Inválido'})
-        }
+    const token = authHeader.replace('Bearer ', '')
 
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+
+        // deixa os dados do usuário disponíveis
         req.user = decoded
-        next()
-    })
-} 
 
-export default authenticateToken
+    } catch (error) {
+        throw new AppError('Invalid token', 401)
+    }
+}

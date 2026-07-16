@@ -18,6 +18,7 @@ const midiaLocalSchema = new mongoose.Schema({
     required: false,
   },
   igreja: { type: String, required: false },
+  imagem: { type: String, required: false },
 }, { timestamps: true }); // Cria campos automáticos de createdAt e updatedAt
 
 const MidiaLocalModel = mongoose.model('MidiaLocal', midiaLocalSchema);
