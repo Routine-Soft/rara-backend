@@ -25,7 +25,11 @@ const userSchema = new mongoose.Schema({
     email: { type: String, required: false, unique: true },
     password: { type: String, required: false },
 
-    church: { type: String, required: false },
+    churchId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Church",
+        required: false
+    },
 
     address: { type: addressSchema, required: false },
 

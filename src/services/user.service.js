@@ -1,17 +1,19 @@
 import argon2 from 'argon2'
 import jwt from 'jsonwebtoken'
 import UserModel from '../models/user.model.js'
+import ChurchModel from '../models/church.model.js'
 import { createUserDTO, updateUserDTO, loginUserDTO } from '../dtos/user.dto.js' 
 import { verify } from 'node:crypto'
 import AppError from '../errors/AppError.js'
 
+
 export const UserService = {
     async findAll() {
-        return await UserModel.find()
+        return await UserModel.find().populate('churchId')
     },
 
     async findById(id) {
-        const user = await UserModel.findById(id)
+        const user = await UserModel.findById(id).populate('churchId')
         if (!user) {
             throw new AppError('User not found', 404)
         }
@@ -20,12 +22,26 @@ export const UserService = {
 
     async createUser(body) {
         const userDTO = createUserDTO(body)
+        if(userDTO.churchId) {
+            const church = await ChurchModel.findById(userDTO.churchId)
+            if (!church) {
+                throw new AppError('Church not found', 404)
+            }
+        }
+
         userDTO.password = await argon2.hash(userDTO.password)
         return await UserModel.create(userDTO)
     },
 
     async updateUser(id, body) {
         const userDTO = updateUserDTO(body)
+        if (userDTO.churchId) {
+
+            const church = await ChurchModel.findById(userDTO.churchId)
+            if (!church) {
+                throw new AppError("Church not found", 404)
+            }
+        }
         const user = await UserModel.findByIdAndUpdate(id, { $set: userDTO }, { new: true, runValidators: true })
         if (!user) {
             throw new AppError('User not found', 404)
@@ -44,7 +60,7 @@ export const UserService = {
     async loginUser(body) {
         const userDTO = loginUserDTO(body)
         const {email, password} = userDTO
-        const user = await UserModel.findOne({ email })
+        const user = await UserModel.findOne({ email }).populate('churchId')
         if (!user) {
             throw new AppError('User not found', 404)
         }
