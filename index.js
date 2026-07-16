@@ -1,64 +1,48 @@
-// Importing and initializing the dotenv
+import Fastify from "fastify";
+import fastifyCors from '@fastify/cors'
 import dotenv from "dotenv"
+import db from './src/database/db.js'
+import { userRoutes } from "./src/routes/user.routes.js";
+import { churchRoutes } from "./src/routes/church.routes.js";
+
 dotenv.config();
+const fastify = Fastify({ logger: true })
 
-// Importando MongoDB + Mongoose
-import connectMongoDBWithMongoose from './src/database/connectMongoDBWithMongoose.js'
-connectMongoDBWithMongoose();
+await fastify.register(fastifyCors, {            // 👈
+  origin: true,                           // libera qualquer origem (em prod troca pelo domínio)
+  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+})
 
-// Importando Express e colocando dentro da constante "app"
-import express from 'express'
-import morgan from 'morgan'
-const app = express();
-app.use(express.json()); // sinalizando que receberá JSON
-app.use(express.urlencoded({ extended: true })); // facilita a parte de envio de arquivos
-app.use(morgan('dev'));
+/* =====================================
+   Error Handler Global
+===================================== */
 
-import cors from 'cors'
-const allowedOrigins = [
-    '',
-    'https://api.comunhaorara.com',
-    'https://app.cestsegrabalho.com.br',
-    'https://cestsegrabalho.com.br',
-    'http://localhost:3000'
-];
-// Incluir site vercel que iriei criar
+fastify.setErrorHandler((error, request, reply) => {
 
-const corsOptions = {
-    origin: (origin, callback) => {
-        if (allowedOrigins.includes(origin) || !origin) {
-            callback(null, true);
-        } else {
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-};
-app.use(cors(corsOptions));
+  fastify.log.error(error)
+
+  return reply.status(error.statusCode || 500).send({
+    success: false,
+    message: error.message || 'Erro interno do servidor'
+  })
+})
 
 // * ========== ROUTERS ======== *
-import routerUser from './src/routes/routeUser.js'
-app.use('/', routerUser)
+await fastify.register(userRoutes, {prefix: '/api'});
+await fastify.register(churchRoutes, {prefix: '/api'});
 
-import routerIgreja from './src/routes/routerIgreja.js'
-app.use('/', routerIgreja)
+// Conexão com MongoDB e start do servidor
+const start = async () => {
+  try {
+    await db()
 
-import routerResetPassword from './src/routes/ResetPasswordRequest.js'
-app.use('/', routerResetPassword)
+    await fastify.listen({ port: process.env.PORT || 8081, host: '0.0.0.0' })
+    console.log(`🚀 Servidor rodando na porta ${process.env.PORT || 8081}`)
+  } catch (err) {
+    fastify.log.error(err)
+    process.exit(1)
+  }
+}
 
-import routerChristianGroup from './src/routes/routerChristianGroup.js'
-app.use('/', routerChristianGroup)
-
-import routerMidiaLocal from './src/routes/routerMidiaLocal.js'
-app.use('/', routerMidiaLocal)
-
-import ResetPasswordRequest from './src/routes/ResetPasswordRequest.js'
-app.use('/', ResetPasswordRequest)
-// * ========== ROUTERS ======== *
-
-// Definindo a porta
-const port = 8081;
-
-// Função que será executada quando o servidor ficar online
-app.listen(port, '0.0.0.0', () => console.log(`Rodando com Express na porta ${port}`));
+start()
