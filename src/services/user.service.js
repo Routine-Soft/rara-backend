@@ -85,15 +85,6 @@ export const UserService = {
         return { message: 'User logged out successfully' }
     },
 
-    async verifyToken(token) {
-        try {
-            const decoded = jwt.verify(token, process.env.JWT_SECRET)
-            return decoded
-        } catch (error) {
-            throw new AppError('Invalid token', 401)
-        }
-    },
-
     async refresh(refreshToken) {
         try {
             const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET)
