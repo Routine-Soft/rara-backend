@@ -12,9 +12,11 @@ export function createUserDTO(body) {
         invitationofgrace: body.invitationofgrace,
         status: body.status,
         baptized: body.baptized,
-        admin: body.admin ?? false,
+        member: body.member ?? false,
+        roles: body.roles ?? [],
     }
 }
+
 
 // DTO for updating a user - except for the password, which should be handled separately
 export function updateUserDTO(body) {
@@ -29,7 +31,8 @@ export function updateUserDTO(body) {
         'invitationofgrace',
         'status',
         'baptized',
-        'admin'
+        'member',
+        'roles',
     ]
   return Object.fromEntries(
     Object.entries(body).filter(([key]) => allowed.includes(key))
@@ -42,4 +45,31 @@ export function loginUserDTO(body) {
         email: body.email,
         password: body.password,
     }
+}
+
+export function createFacilitatorUserDTO(body) {
+    return {
+        name: body.name,
+        phone: body.phone,
+        gender: body.gender,
+        birthdate: body.birthdate,
+        email: body.email,
+        churchId: body.churchId,
+        address: body.address ?? {},
+        invitationofgrace: body.invitationofgrace,
+        status: body.status,
+        baptized: body.baptized,
+        member: body.member ?? false,
+        roles: [],
+        facilitator: body.facilitator ?? false,
+    }
+}
+
+export function updateFacilitatorUserDTO(body) {
+    const allowed = [
+        'facilitator',
+    ]
+      return Object.fromEntries(
+    Object.entries(body).filter(([key]) => allowed.includes(key))
+  )
 }

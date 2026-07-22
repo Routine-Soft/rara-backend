@@ -1,5 +1,4 @@
 import mongoose from 'mongoose'
-import argon2 from 'argon2'
 
 const addressSchema = new mongoose.Schema(
     {
@@ -20,10 +19,10 @@ const userSchema = new mongoose.Schema({
     name: { type: String, required: false },
     phone: { type: String, required: false },
     gender: { type: String, required: false },
-    birthdate: { type: String, required: false },
+    birthdate: { type: Date, required: false },
 
     email: { type: String, required: false, unique: true },
-    password: { type: String, required: false },
+    password: { type: String, default: null },
 
     churchId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -33,11 +32,29 @@ const userSchema = new mongoose.Schema({
 
     address: { type: addressSchema, required: false },
 
-    invitationofgrace: { type: String, required: false },
-    status: { type: String, required: false },
-    baptized: { type: String, required: false },
+    invitationofgrace: { type: String, required: false }, //Aceitou ou Reconciliou
+    status: { type: String, required: false }, //presente, ausente, trocou de igreja
+    baptized: { type: Boolean, default: false, required: false },
+
+    member: { type: Boolean, default: false, required: false },
+    roles: [{
+        type: String,
+        enum: [
+        "facilitador_lider",
+        "facilitador",
+        "christian_group_lider",
+        "departamento_lider",
+        "financeiro_lider",
+        "avancai_lider",
+        "midia_lider",
+        "pastor_local",
+        "super_admin",
+        ]
+    }],
+    facilitator: { type: String, required: false },
 
     token: { type: String, required: false },
+    tokenRefresh: { type: String, required: false },
     resetPasswordToken: { type: String, required: false },
     resetPasswordExpires: { type: Date, required: false },
 
@@ -53,8 +70,6 @@ const userSchema = new mongoose.Schema({
         type: [String],
         default: []
     },
-
-    admin: { type: Boolean, required: false },
     
 }, { timestamps: true });
 

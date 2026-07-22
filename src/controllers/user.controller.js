@@ -51,4 +51,15 @@ export const UserController = {
         const result = await UserService.updatePassword(id, req.body);
         return reply.send(result)
     },
+
+    async createFacilitatorUser(req, reply) {
+        const user = await UserService.createFacilitatorUser(req.body)
+        return reply.code(201).send(user)
+    },
+
+    async updateFacilitatorUser(req, reply) {
+        const { id } = req.params
+        const user = await UserService.updateFacilitatorUser(id, req.body)
+        return reply.send(user)
+    },
 }

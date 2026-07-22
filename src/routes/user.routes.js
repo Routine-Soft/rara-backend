@@ -19,5 +19,7 @@ export async function userRoutes(fastify) {
         fastify.post('/users/:id/password', UserController.updatePassword);
         fastify.delete('/users/:id', UserController.deleteUser);
         fastify.post('/users/logout', UserController.logoutUser);
+        fastify.post('/users/facilitator', UserController.createFacilitatorUser);
+        fastify.patch('/users/facilitator/:id', UserController.updateFacilitatorUser);
     })
 }

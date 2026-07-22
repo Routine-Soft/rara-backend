@@ -2,10 +2,10 @@ import argon2 from 'argon2'
 import jwt from 'jsonwebtoken'
 import UserModel from '../models/user.model.js'
 import ChurchModel from '../models/church.model.js'
-import { createUserDTO, updateUserDTO, loginUserDTO } from '../dtos/user.dto.js' 
+import { createUserDTO, updateUserDTO, loginUserDTO, createFacilitatorUserDTO, updateFacilitatorUserDTO } from '../dtos/user.dto.js'
 import { verify } from 'node:crypto'
 import AppError from '../errors/AppError.js'
-
+import crypto from 'crypto'
 
 export const UserService = {
     async findAll() {
@@ -33,6 +33,41 @@ export const UserService = {
         return await UserModel.create(userDTO)
     },
 
+    async createFacilitatorUser(body) {
+        const userDTO = createFacilitatorUserDTO(body)
+
+        if (userDTO.churchId) {
+            const church = await ChurchModel.findById(userDTO.churchId)
+
+            if (!church) {
+                throw new AppError('Church not found', 404)
+            }
+        }
+
+        const userExists = await UserModel.findOne({
+            email: userDTO.email
+        })
+
+        if (userExists) {
+            throw new AppError('User already exists', 409)
+        }
+
+        const password = crypto.randomBytes(6).toString('base64')
+
+        userDTO.password = await argon2.hash(password)
+
+        const user = await UserModel.create(userDTO)
+
+        // TODO: Enviar senha pelo WhatsApp
+        console.log({
+            phone: user.phone,
+            email: user.email,
+            password
+        })
+
+        return user
+    },
+
     async updateUser(id, body) {
         const userDTO = updateUserDTO(body)
         if (userDTO.churchId) {
@@ -46,6 +81,23 @@ export const UserService = {
         if (!user) {
             throw new AppError('User not found', 404)
         }
+        return user
+    },
+
+    async updateFacilitatorUser(id, body) {
+        const userDTO = updateFacilitatorUserDTO(body)
+        if (userDTO.churchId) {
+            const church = await ChurchModel.findById(userDTO.churchId)
+            if (!church) {
+                throw new AppError("Church not found", 404)
+            }
+        }
+        const user = await UserModel.findByIdAndUpdate(id, { $set: userDTO }, { new: true, runValidators: true })
+
+        if (!user) {
+            throw new AppError('User not found', 404)
+        }
+
         return user
     },
 
@@ -88,12 +140,32 @@ export const UserService = {
     async refresh(refreshToken) {
         try {
             const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET)
+
+            console.log(decoded)
+
             const user = await UserModel.findById(decoded.id)
-            if (!user || user.tokenRefresh !== refreshToken) throw new AppError('User not found', 404)
-            const newAccessToken = jwt.sign({ id: user._id}, process.env.JWT_SECRET, { expiresIn: '1h' })
+
+            console.log(user)
+
+            if (!user) {
+                throw new AppError("User not found", 404)
+            }
+
+            if (user.tokenRefresh !== refreshToken) {
+                throw new AppError("Invalid refresh token", 401)
+            }
+
+            const newAccessToken = jwt.sign(
+                { id: user._id },
+                process.env.JWT_SECRET,
+                { expiresIn: '1h' }
+            )
+
             return { accessToken: newAccessToken }
+
         } catch (error) {
-            throw new AppError('Invalid refresh token', 401)
+            console.log(error) // <-- MUITO IMPORTANTE
+            throw error
         }
     },
 
@@ -110,5 +182,5 @@ export const UserService = {
         user.password = await argon2.hash(newPassword)
         await user.save()
         return { message: 'Password updated successfully' }
-    }
+    },
 }
