@@ -1,8 +1,8 @@
 User ok
 Church ok
+Midialocal ok
 
 Falta:
-MidiaLocal
 Christian Group
 Avancai
 Financeiro : Dizimo e Oferta em Pix ou Cartão de Débito

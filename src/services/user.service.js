@@ -120,7 +120,7 @@ export const UserService = {
         if (!valid) {
             throw new AppError('Invalid password', 401)
         }
-        const accessToken = jwt.sign({ id: user._id}, process.env.JWT_SECRET, { expiresIn: '1h' })
+        const accessToken = jwt.sign({ id: user._id}, process.env.JWT_SECRET, { expiresIn: '24h' })
         const refreshToken = jwt.sign({ id: user._id}, process.env.JWT_SECRET, { expiresIn: '7d' })
         user.tokenRefresh = refreshToken
         await user.save()
@@ -158,7 +158,7 @@ export const UserService = {
             const newAccessToken = jwt.sign(
                 { id: user._id },
                 process.env.JWT_SECRET,
-                { expiresIn: '1h' }
+                { expiresIn: '24h' }
             )
 
             return { accessToken: newAccessToken }
