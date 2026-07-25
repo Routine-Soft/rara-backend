@@ -4,6 +4,7 @@ import dotenv from "dotenv"
 import db from './src/database/db.js'
 import { userRoutes } from "./src/routes/user.routes.js";
 import { churchRoutes } from "./src/routes/church.routes.js";
+import { midiaLocalRoutes } from "./src/routes/midialocal.routes.js";
 
 dotenv.config();
 const fastify = Fastify({ logger: true })
@@ -31,6 +32,7 @@ fastify.setErrorHandler((error, request, reply) => {
 // * ========== ROUTERS ======== *
 await fastify.register(userRoutes, {prefix: '/api'});
 await fastify.register(churchRoutes, {prefix: '/api'});
+await fastify.register(midiaLocalRoutes, {prefix: '/api'});
 
 // Conexão com MongoDB e start do servidor
 const start = async () => {
