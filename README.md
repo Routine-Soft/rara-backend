@@ -1,10 +1,8 @@
 User ok
 Church ok
 Midialocal ok
+Christian Group ok
+Avancai ok
 
 Falta:
-Christian Group
-Avancai
-Financeiro : Dizimo e Oferta em Pix ou Cartão de Débito
-AuditLog
-Transations
+Cura da alma

@@ -6,6 +6,8 @@ import { userRoutes } from "./src/routes/user.routes.js";
 import { churchRoutes } from "./src/routes/church.routes.js";
 import { midiaLocalRoutes } from "./src/routes/midialocal.routes.js";
 import { christianGroupRoutes } from "./src/routes/christiangroup.routes.js";
+import { lessonRoutes } from "./src/routes/lesson.routes.js";
+import { lessonProgressRoutes } from "./src/routes/lessonProgress.routes.js";
 
 dotenv.config();
 const fastify = Fastify({ logger: true })
@@ -35,6 +37,8 @@ await fastify.register(userRoutes, {prefix: '/api'});
 await fastify.register(churchRoutes, {prefix: '/api'});
 await fastify.register(midiaLocalRoutes, {prefix: '/api'});
 await fastify.register(christianGroupRoutes, {prefix: '/api'});
+await fastify.register(lessonRoutes, {prefix: '/api'});
+await fastify.register(lessonProgressRoutes, {prefix: '/api'});
 
 // Conexão com MongoDB e start do servidor
 const start = async () => {

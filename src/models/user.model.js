@@ -57,19 +57,6 @@ const userSchema = new mongoose.Schema({
     tokenRefresh: { type: String, required: false },
     resetPasswordToken: { type: String, required: false },
     resetPasswordExpires: { type: Date, required: false },
-
-    reset: {
-        type: [String],
-        default: []
-    },
-    start: {
-        type: [String],
-        default: []
-    },
-    cdv: {
-        type: [String],
-        default: []
-    },
     
 }, { timestamps: true });
 
