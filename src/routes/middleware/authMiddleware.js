@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken'
 import AppError from '../../errors/AppError.js'
+import UserModel from '../../models/user.model.js'
 
 export async function authenticate(req, reply) {
     const authHeader = req.headers.authorization
@@ -18,5 +19,25 @@ export async function authenticate(req, reply) {
 
     } catch (error) {
         throw new AppError('Invalid token', 401)
+    }
+}
+
+export function authorize(allowedRoles = []) {
+    return async function (req, reply) {
+        if (!req.user?.id) {
+            throw new AppError('Invalid token', 401)
+        }
+
+        const user = await UserModel.findById(req.user.id)
+        if (!user) {
+            throw new AppError('User not found', 404)
+        }
+
+        const roles = Array.isArray(user.roles) ? user.roles : []
+        const hasAccess = roles.some(role => allowedRoles.includes(role))
+
+        if (!hasAccess) {
+            throw new AppError('Forbidden', 403)
+        }
     }
 }
