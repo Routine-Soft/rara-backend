@@ -1,5 +1,5 @@
 import { MidiaLocalController } from '../controllers/midialocal.controller.js'
-import { authenticate } from './middleware/authMiddleware.js'
+import { authenticate, authorize } from './middleware/authMiddleware.js'
 
 export async function midiaLocalRoutes(fastify) {
     fastify.register(async function (fastify) {
@@ -8,8 +8,26 @@ export async function midiaLocalRoutes(fastify) {
         // protected routes
         fastify.get('/midialocal', MidiaLocalController.getAllMidiaLocals)
         fastify.get('/midialocal/:id', MidiaLocalController.getMidiaLocalById)
-        fastify.post('/midialocal', MidiaLocalController.createMidiaLocal)
-        fastify.patch('/midialocal/:id', MidiaLocalController.updateMidiaLocal)
-        fastify.delete('/midialocal/:id', MidiaLocalController.deleteMidiaLocal)
+        fastify.post('/midialocal', {
+                preHandler: authorize([
+                    'super_admin',
+                    'pastor_local',
+                    'midia_lider'
+                ])
+            }, MidiaLocalController.createMidiaLocal)
+        fastify.patch('/midialocal/:id', {
+                preHandler: authorize([
+                    'super_admin',
+                    'pastor_local',
+                    'midia_lider'
+                ])
+            }, MidiaLocalController.updateMidiaLocal)
+        fastify.delete('/midialocal/:id', {
+                preHandler: authorize([
+                    'super_admin',
+                    'pastor_local',
+                    'midia_lider'
+                ])
+            }, MidiaLocalController.deleteMidiaLocal)
     })
 }

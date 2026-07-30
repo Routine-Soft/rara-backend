@@ -1,5 +1,5 @@
 import {UserController} from '../controllers/user.controller.js'
-import { authenticate } from './middleware/authMiddleware.js'
+import { authenticate, authorize } from './middleware/authMiddleware.js'
 
 export async function userRoutes(fastify) {
 
@@ -13,13 +13,49 @@ export async function userRoutes(fastify) {
         fastify.addHook('preHandler', authenticate);
 
         // protected routes
-        fastify.get('/users', UserController.getAllUsers);
+        fastify.get('/users',
+            {
+                preHandler: authorize([
+                    'super_admin',
+                    'pastor_local',
+                    'avancai_lider',
+                    'departamento_lider',
+                    'christian_group_lider',
+                    'facilitador',
+                    'secretaria_cura'
+                ])
+            }, UserController.getAllUsers);
         fastify.get('/users/:id', UserController.getUserById);
         fastify.patch('/users/:id', UserController.updateUser);
         fastify.post('/users/:id/password', UserController.updatePassword);
-        fastify.delete('/users/:id', UserController.deleteUser);
+        fastify.delete('/users/:id', {
+                preHandler: authorize([
+                    'super_admin',
+                    'pastor_local',
+                ])
+            }, UserController.deleteUser);
         fastify.post('/users/logout', UserController.logoutUser);
-        fastify.post('/users/facilitator', UserController.createFacilitatorUser);
-        fastify.patch('/users/facilitator/:id', UserController.updateFacilitatorUser);
+        fastify.post('/users/facilitator', {
+                preHandler: authorize([
+                    'super_admin',
+                    'pastor_local',
+                    'christian_group_lider',
+                    'facilitador',
+                ])
+            }, UserController.createFacilitatorUser);
+        fastify.patch('/users/facilitator/:id', {
+                preHandler: authorize([
+                    'super_admin',
+                    'pastor_local',
+                    'christian_group_lider',
+                    'facilitador',
+                ])
+            }, UserController.updateFacilitatorUser);
+        fastify.patch('/users/:id/roles', {
+                preHandler: authorize([
+                    'super_admin',
+                    'pastor_local',
+                ])
+            }, UserController.updateUserRoles);
     })
 }

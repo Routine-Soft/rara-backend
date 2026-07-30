@@ -13,7 +13,7 @@ export function createUserDTO(body) {
         status: body.status,
         baptized: body.baptized,
         member: body.member ?? false,
-        roles: body.roles ?? [],
+        roles: [],
     }
 }
 
@@ -32,11 +32,19 @@ export function updateUserDTO(body) {
         'status',
         'baptized',
         'member',
-        'roles',
     ]
   return Object.fromEntries(
     Object.entries(body).filter(([key]) => allowed.includes(key))
   )
+}
+
+export function updateUserRolesDTO(body) {
+    const allowed = [
+        'roles',
+    ]
+    return {
+        roles: Array.isArray(body.roles) ? body.roles : [],
+    }
 }
 
 // DTO for user login

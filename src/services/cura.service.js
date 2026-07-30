@@ -36,7 +36,7 @@ export const CuraService = {
             churchId: user.churchId ?? null,
         }
     },
-
+ 
     // manager view: list all with optional filters and church scope
     async findAll(filters = {}, authUser) {
         const scope = await this.getUserScope(authUser.id)

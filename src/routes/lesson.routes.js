@@ -1,5 +1,5 @@
 import { LessonController } from '../controllers/lesson.controller.js'
-import { authenticate } from './middleware/authMiddleware.js'
+import { authenticate, authorize } from './middleware/authMiddleware.js'
 
 export async function lessonRoutes(fastify) {
     fastify.register(async function (fastify) {
@@ -7,8 +7,20 @@ export async function lessonRoutes(fastify) {
 
         fastify.get('/lessons', LessonController.getAllLessons)
         fastify.get('/lessons/:id', LessonController.getLessonById)
-        fastify.post('/lessons', LessonController.createLesson)
-        fastify.patch('/lessons/:id', LessonController.updateLesson)
-        fastify.delete('/lessons/:id', LessonController.deleteLesson)
+        fastify.post('/lessons', {
+                preHandler: authorize([
+                    'super_admin',
+                ])
+            }, LessonController.createLesson)
+        fastify.patch('/lessons/:id', {
+                preHandler: authorize([
+                    'super_admin',
+                ])
+            }, LessonController.updateLesson)
+        fastify.delete('/lessons/:id', {
+                preHandler: authorize([
+                    'super_admin',
+                ])
+            }, LessonController.deleteLesson)
     })
 }

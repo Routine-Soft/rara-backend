@@ -40,11 +40,10 @@ const userSchema = new mongoose.Schema({
     roles: [{
         type: String,
         enum: [
-        "facilitador_lider",
         "facilitador",
         "christian_group_lider",
         "departamento_lider",
-        "financeiro_lider",
+        "secretaria_cura",
         "avancai_lider",
         "midia_lider",
         "pastor_local",

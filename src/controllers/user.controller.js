@@ -24,6 +24,12 @@ export const UserController = {
         return reply.send(user)
     },
 
+    async updateUserRoles(req, reply) {
+        const { id } = req.params
+        const user = await UserService.updateUserRoles(id, req.body, req.user)
+        return reply.send(user)
+    },
+
     async deleteUser(req, reply) {
         const { id } = req.params
         const result = await UserService.deleteUser(id)

@@ -2,7 +2,7 @@ import argon2 from 'argon2'
 import jwt from 'jsonwebtoken'
 import UserModel from '../models/user.model.js'
 import ChurchModel from '../models/church.model.js'
-import { createUserDTO, updateUserDTO, loginUserDTO, createFacilitatorUserDTO, updateFacilitatorUserDTO } from '../dtos/user.dto.js'
+import { createUserDTO, updateUserDTO, loginUserDTO, createFacilitatorUserDTO, updateFacilitatorUserDTO, updateUserRolesDTO } from '../dtos/user.dto.js'
 import { verify } from 'node:crypto'
 import AppError from '../errors/AppError.js'
 import crypto from 'crypto'
@@ -68,20 +68,67 @@ export const UserService = {
         return user
     },
 
-    async updateUser(id, body) {
-        const userDTO = updateUserDTO(body)
-        if (userDTO.churchId) {
-
-            const church = await ChurchModel.findById(userDTO.churchId)
-            if (!church) {
-                throw new AppError("Church not found", 404)
-            }
+    async updateUserRoles(id, body, authUser) {
+        const userDTO = updateUserRolesDTO(body)
+        const loggedUser = await UserModel.findById(authUser.id)
+        if (!loggedUser) {
+            throw new AppError('Authenticated user not found', 404)
         }
-        const user = await UserModel.findByIdAndUpdate(id, { $set: userDTO }, { new: true, runValidators: true })
-        if (!user) {
+
+        const targetUser = await UserModel.findById(id)
+        if (!targetUser) {
             throw new AppError('User not found', 404)
         }
-        return user
+
+        const loggedRoles = Array.isArray(loggedUser.roles)
+            ? loggedUser.roles
+            : []
+
+        const targetRoles = Array.isArray(targetUser.roles)
+            ? targetUser.roles
+            : []
+
+        const loggedIsSuperAdmin = loggedRoles.includes('super_admin')
+        const loggedIsPastor = loggedRoles.includes('pastor_local')
+        const targetIsSuperAdmin = targetRoles.includes('super_admin')
+
+        // Super Admin não pode remover o próprio cargo.
+        if (
+            loggedIsSuperAdmin &&
+            loggedUser.id.toString() === targetUser.id.toString() &&
+            !userDTO.roles.includes('super_admin')
+        ) {
+            throw new AppError(
+                'You cannot remove your own super_admin role.',
+                403
+            )
+        }
+
+        // Pastor não pode editar um Super Admin.
+        if (
+            loggedIsPastor &&
+            targetIsSuperAdmin
+        ) {
+            throw new AppError(
+                'Pastor cannot edit a super admin.',
+                403
+            )
+        }
+
+        // Pastor não pode criar um novo Super Admin.
+        if (
+            loggedIsPastor &&
+            userDTO.roles.includes('super_admin')
+        ) {
+            throw new AppError(
+                'Pastor cannot assign the super_admin role.',
+                403
+            )
+        }
+
+        targetUser.roles = userDTO.roles
+        await targetUser.save()
+        return targetUser
     },
 
     async updateFacilitatorUser(id, body) {
