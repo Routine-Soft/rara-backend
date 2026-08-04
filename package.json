@@ -1,5 +1,8 @@
 {
   "type": "module",
+    "scripts": {
+    "start": "nodemon index.js"
+  },                       
   "dependencies": {
     "@fastify/cors": "^11.2.0",
     "argon2": "^0.41.1",
