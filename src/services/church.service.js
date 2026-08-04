@@ -38,6 +38,6 @@ export const ChurchService = {
         if (!church) {
             throw new AppError('Church not found', 404)
         }
-        return { message: 'Church deleted successfully' }
+        return null
     },
 }

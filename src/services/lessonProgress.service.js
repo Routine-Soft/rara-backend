@@ -115,6 +115,6 @@ export const LessonProgressService = {
             throw new AppError('Lesson progress not found', 404)
         }
 
-        return { message: 'Lesson progress deleted successfully' }
+        return null
     },
 }

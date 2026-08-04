@@ -2,13 +2,14 @@ import { ChurchController } from '../controllers/church.controller.js'
 import { authenticate, authorize } from './middleware/authMiddleware.js'
 
 export async function churchRoutes(fastify) {
+    // Public routes
+    fastify.get('/churchs', ChurchController.getAllChurchs)
+
+    // protected routes
     fastify.register(async function (fastify) {
+
         fastify.addHook('preHandler', authenticate)
 
-        fastify.get('/churchs', ChurchController.getAllChurchs)
-
-        // protected routes
-        
         fastify.get('/churchs/:id', ChurchController.getChurchById)
         fastify.post('/churchs', {
                         preHandler: authorize([

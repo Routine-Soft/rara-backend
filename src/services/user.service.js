@@ -9,11 +9,11 @@ import crypto from 'crypto'
 
 export const UserService = {
     async findAll() {
-        return await UserModel.find().populate('churchId')
+        return await UserModel.find()
     },
 
     async findById(id) {
-        const user = await UserModel.findById(id).populate('churchId')
+        const user = await UserModel.findById(id)
         if (!user) {
             throw new AppError('User not found', 404)
         }
@@ -153,19 +153,19 @@ export const UserService = {
         if (!user) {
             throw new AppError('User not found', 404)
         }
-        return { message: 'User deleted successfully'}
+        return null
     },
 
     async loginUser(body) {
         const userDTO = loginUserDTO(body)
         const {email, password} = userDTO
-        const user = await UserModel.findOne({ email }).populate('churchId')
+        const user = await UserModel.findOne({ email })
         if (!user) {
-            throw new AppError('User not found', 404)
+            throw new AppError('Email ou senha incorretos', 401)
         }
         const valid = await argon2.verify(user.password, password)
         if (!valid) {
-            throw new AppError('Invalid password', 401)
+            throw new AppError('Email ou senha incorretos', 401)
         }
         const accessToken = jwt.sign({ id: user._id}, process.env.JWT_SECRET, { expiresIn: '24h' })
         const refreshToken = jwt.sign({ id: user._id}, process.env.JWT_SECRET, { expiresIn: '7d' })
@@ -181,7 +181,7 @@ export const UserService = {
         }
         user.tokenRefresh = null
         await user.save()
-        return { message: 'User logged out successfully' }
+        return null
     },
 
     async refresh(refreshToken) {
@@ -228,6 +228,6 @@ export const UserService = {
         }
         user.password = await argon2.hash(newPassword)
         await user.save()
-        return { message: 'Password updated successfully' }
+        return null
     },
 }

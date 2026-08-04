@@ -59,6 +59,6 @@ export const MidiaLocalService = {
             throw new AppError('MidiaLocal not found', 404)
         }
 
-        return { message: 'MidiaLocal deleted successfully' }
+        return null
     },
 }

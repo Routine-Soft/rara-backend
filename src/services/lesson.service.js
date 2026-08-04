@@ -46,6 +46,6 @@ export const LessonService = {
             throw new AppError('Lesson not found', 404)
         }
 
-        return { message: 'Lesson deleted successfully' }
+        return null
     },
 }

@@ -59,6 +59,6 @@ export const ChristianGroupService = {
             throw new AppError('ChristianGroup not found', 404)
         }
 
-        return { message: 'ChristianGroup deleted successfully' }
+        return null
     },
 }

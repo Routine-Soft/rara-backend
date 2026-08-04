@@ -114,7 +114,7 @@ export const CuraService = {
 
         const careRequest = await CuraModel.findOneAndDelete(query)
         if (!careRequest) throw new AppError('Care request not found', 404)
-        return { message: 'Care request deleted successfully' }
+        return null
     },
 
     // dashboard counters
