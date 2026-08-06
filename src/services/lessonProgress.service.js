@@ -40,6 +40,31 @@ export const LessonProgressService = {
             throw new AppError('Lesson not found', 404)
         }
 
+        // Recalcular isCorrect baseado na lição
+        let score = 0
+        const gradedAnswers = lessonProgressDTO.answers.map(answer => {
+            const question = lesson.questions[answer.questionIndex]
+
+            if (!question) {
+                throw new AppError('Invalid question index', 400)
+            }
+
+            const isCorrect = question.correctOptionIndex === answer.selectedOptionIndex
+
+            if (isCorrect) {
+                score++
+            }
+
+            return {
+                questionIndex: answer.questionIndex,
+                selectedOptionIndex: answer.selectedOptionIndex,
+                isCorrect,
+            }
+        })
+
+        lessonProgressDTO.answers = gradedAnswers
+        lessonProgressDTO.score = score
+
         return await LessonProgressModel.create(lessonProgressDTO)
     },
 
@@ -93,19 +118,54 @@ export const LessonProgressService = {
     },
 
     async updateLessonProgress(id, body) {
-        const lessonProgressDTO = updateLessonProgressDTO(body)
-
-        const progress = await LessonProgressModel.findByIdAndUpdate(
-            id,
-            { $set: lessonProgressDTO },
-            { new: true, runValidators: true }
-        )
+        const progress = await LessonProgressModel.findById(id)
 
         if (!progress) {
             throw new AppError('Lesson progress not found', 404)
         }
 
-        return progress
+        const lessonProgressDTO = updateLessonProgressDTO(body)
+
+        // Se há respostas (answers), recalcular score e isCorrect baseado na lição
+        if (Array.isArray(lessonProgressDTO.answers) && lessonProgressDTO.answers.length > 0) {
+            const lesson = await LessonModel.findById(progress.lessonId)
+
+            if (!lesson) {
+                throw new AppError('Lesson not found', 404)
+            }
+
+            let score = 0
+            const gradedAnswers = lessonProgressDTO.answers.map(answer => {
+                const question = lesson.questions[answer.questionIndex]
+
+                if (!question) {
+                    throw new AppError('Invalid question index', 400)
+                }
+
+                const isCorrect = question.correctOptionIndex === answer.selectedOptionIndex
+
+                if (isCorrect) {
+                    score++
+                }
+
+                return {
+                    questionIndex: answer.questionIndex,
+                    selectedOptionIndex: answer.selectedOptionIndex,
+                    isCorrect,
+                }
+            })
+
+            lessonProgressDTO.answers = gradedAnswers
+            lessonProgressDTO.score = score
+        }
+
+        const updatedProgress = await LessonProgressModel.findByIdAndUpdate(
+            id,
+            { $set: lessonProgressDTO },
+            { new: true, runValidators: true }
+        )
+
+        return updatedProgress
     },
 
     async deleteLessonProgress(id) {
