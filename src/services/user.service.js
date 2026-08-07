@@ -148,6 +148,23 @@ export const UserService = {
         return user
     },
 
+    async updateUser(id, body) {
+        const userDTO = updateUserDTO(body)
+        if (userDTO.churchId) {
+            const church = await ChurchModel.findById(userDTO.churchId)
+            if (!church) {
+                throw new AppError("Church not found", 404)
+            }
+        }
+        const user = await UserModel.findByIdAndUpdate(id, { $set: userDTO }, { new: true, runValidators: true })
+
+        if (!user) {
+            throw new AppError('User not found', 404)
+        }
+
+        return user
+    },
+
     async deleteUser(id) {
         const user = await UserModel.findByIdAndDelete(id)
         if (!user) {

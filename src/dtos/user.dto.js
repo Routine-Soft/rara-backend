@@ -13,6 +13,7 @@ export function createUserDTO(body) {
         status: body.status,
         baptized: body.baptized,
         member: body.member ?? false,
+        facilitador: body.facilitador ?? '',
         roles: [],
     }
 }
@@ -69,7 +70,7 @@ export function createFacilitatorUserDTO(body) {
         baptized: body.baptized,
         member: body.member ?? false,
         roles: [],
-        facilitator: body.facilitator ?? false,
+        facilitator: body.facilitador ?? body.facilitator,
     }
 }
 

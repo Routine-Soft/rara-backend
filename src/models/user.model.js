@@ -32,8 +32,25 @@ const userSchema = new mongoose.Schema({
 
     address: { type: addressSchema, required: false },
 
-    invitationofgrace: { type: String, required: false }, //Aceitou ou Reconciliou
-    status: { type: String, required: false }, //presente, ausente, trocou de igreja
+    invitationofgrace: {
+        type: String,
+        enum: [
+            "Aceitou Jesus",
+            "Reconciliou",
+            "Troca de Igreja",
+            "Recebeu Oração"
+        ],
+        required: false
+    },
+    status: {
+        type: String,
+        enum: [
+            "Presente",
+            "Ausente",
+            "Foi embora"
+        ],
+        required: false
+    },
     baptized: { type: Boolean, default: false, required: false },
 
     member: { type: Boolean, default: false, required: false },
