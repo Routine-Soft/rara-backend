@@ -1,14 +1,21 @@
 import { LessonService } from '../services/lesson.service.js'
+import UserModel from '../models/user.model.js'
+
+// super_admin cria/edita lições, então precisa ver o gabarito
+async function canSeeAnswers(authUser) {
+    const user = await UserModel.findById(authUser.id)
+    return Array.isArray(user?.roles) && user.roles.includes('super_admin')
+}
 
 export const LessonController = {
     async getAllLessons(req, reply) {
-        const lessons = await LessonService.findAll()
+        const lessons = await LessonService.findAll({ withAnswers: await canSeeAnswers(req.user) })
         return reply.send({ success: true, data: lessons, message: `Found ${lessons.length} lessons` })
     },
 
     async getLessonById(req, reply) {
         const { id } = req.params
-        const lesson = await LessonService.findById(id)
+        const lesson = await LessonService.findById(id, { withAnswers: await canSeeAnswers(req.user) })
         return reply.send({ success: true, data: lesson, message: 'Lesson retrieved successfully' })
     },
 

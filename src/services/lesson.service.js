@@ -3,19 +3,20 @@ import { createLessonDTO, updateLessonDTO, publicLessonDTO } from '../dtos/lesso
 import AppError from '../errors/AppError.js'
 
 export const LessonService = {
-    async findAll() {
+    // withAnswers = true só para quem administra as lições (inclui o gabarito)
+    async findAll({ withAnswers = false } = {}) {
         const lessons = await LessonModel.find().sort({ module: 1, number: 1 })
-        return lessons.map(publicLessonDTO)
+        return withAnswers ? lessons : lessons.map(publicLessonDTO)
     },
 
-    async findById(id) {
+    async findById(id, { withAnswers = false } = {}) {
         const lesson = await LessonModel.findById(id)
 
         if (!lesson) {
             throw new AppError('Lesson not found', 404)
         }
 
-        return publicLessonDTO(lesson)
+        return withAnswers ? lesson : publicLessonDTO(lesson)
     },
 
     async createLesson(body) {

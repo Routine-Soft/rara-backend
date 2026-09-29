@@ -9,11 +9,11 @@ export function createUserDTO(body) {
         password: body.password,
         churchId: body.churchId,
         address: body.address ?? {},
-        invitationofgrace: body.invitationofgrace,
-        status: body.status,
-        baptized: body.baptized,
+        invitationofgrace: body.invitationofgrace ?? 'Não preencheu',
+        status: body.status ?? 'Presente',
+        baptized: body.baptized ?? false,
         member: body.member ?? false,
-        facilitator: body.facilitator ?? '',
+        facilitator: body.facilitator ?? 'Não possui',
         roles: [],
     }
 }
@@ -70,12 +70,15 @@ export function createFacilitatorUserDTO(body) {
         baptized: body.baptized,
         member: body.member ?? false,
         roles: [],
-        facilitator: body.facilitador ?? body.facilitator,
+        facilitator: body.facilitator ?? 'Não possui',
     }
 }
 
 export function updateFacilitatorUserDTO(body) {
     const allowed = [
+        'invitationofgrace',
+        'status',
+        'baptized',
         'facilitator',
     ]
       return Object.fromEntries(

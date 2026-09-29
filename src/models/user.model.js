@@ -38,7 +38,8 @@ const userSchema = new mongoose.Schema({
             "Aceitou Jesus",
             "Reconciliou",
             "Troca de Igreja",
-            "Recebeu Oração"
+            "Recebeu Oração",
+            "Não preencheu"
         ],
         required: false
     },

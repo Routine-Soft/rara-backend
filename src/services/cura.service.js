@@ -46,7 +46,7 @@ export const CuraService = {
         if (!scope.isSuperAdmin) query.churchId = scope.churchId
 
         return await CuraModel.find(query)
-            .populate('userId', 'name phone email gender birthdate address invitationofgrace status baptized member roles facilitador')
+            .populate('userId', 'name phone email gender birthdate address invitationofgrace status baptized member roles facilitator')
             .populate('assignedTo', 'name')
             .sort({ createdAt: 1 })
     },
@@ -62,7 +62,7 @@ export const CuraService = {
         if (!scope.isSuperAdmin) query.churchId = scope.churchId
 
         const careRequest = await CuraModel.findOne(query)
-            .populate('userId', 'name phone email gender birthdate address invitationofgrace status baptized member roles facilitador')
+            .populate('userId', 'name phone email gender birthdate address invitationofgrace status baptized member roles facilitator')
             .populate('assignedTo', 'name')
         if (!careRequest) throw new AppError('Care request not found', 404)
         return careRequest
@@ -81,7 +81,7 @@ export const CuraService = {
         if (!scope.isSuperAdmin) query.churchId = scope.churchId
 
         const careRequest = await CuraModel.findOneAndUpdate(query, { $set: dto }, { new: true, runValidators: true })
-            .populate('userId', 'name phone email gender birthdate address invitationofgrace status baptized member roles facilitador')
+            .populate('userId', 'name phone email gender birthdate address invitationofgrace status baptized member roles facilitator')
             .populate('assignedTo', 'name')
         if (!careRequest) throw new AppError('Care request not found', 404)
         return careRequest
@@ -105,7 +105,7 @@ export const CuraService = {
         if (!scope.isSuperAdmin) query.churchId = scope.churchId
 
         const careRequest = await CuraModel.findOneAndUpdate(query, { $set: dto }, { new: true, runValidators: true })
-            .populate('userId', 'name phone email gender birthdate address invitationofgrace status baptized member roles facilitador')
+            .populate('userId', 'name phone email gender birthdate address invitationofgrace status baptized member roles facilitator')
             .populate('assignedTo', 'name')
         if (!careRequest) throw new AppError('Care request not found', 404)
         return careRequest
