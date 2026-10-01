@@ -37,6 +37,10 @@ function escapeRegex(text) {
 
 const PROVISIONAL_PASSWORD = '123'
 
+// Cargos que valem para todas as igrejas. Os demais (pastor local,
+// facilitador, líderes...) são da igreja onde foram dados.
+export const GLOBAL_ROLES = ['super_admin', 'programador']
+
 // Quem pode marcar/desmarcar membro e editar outros usuários da igreja
 const MEMBER_MANAGERS = ['super_admin', 'pastor_local', 'avancai_lider']
 
@@ -228,6 +232,14 @@ export const UserService = {
             if (!church) {
                 throw new AppError("Church not found", 404)
             }
+        }
+
+        // Liderança é por igreja: quem troca de igreja chega na nova como
+        // usuário comum (só os cargos gerais continuam)
+        const changesChurch = userDTO.churchId !== undefined &&
+            String(userDTO.churchId ?? '') !== String(current.churchId ?? '')
+        if (changesChurch) {
+            userDTO.roles = (current.roles ?? []).filter((role) => GLOBAL_ROLES.includes(role))
         }
 
         // Data em que virou membro: a escolhida pela liderança (ex.: quem já

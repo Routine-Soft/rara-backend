@@ -49,11 +49,13 @@ export function updateUserDTO(body) {
         'baptized',
         'member',
         'memberSince',
+        'ecclesiasticalRoles',
     ]
   const dto = Object.fromEntries(
     Object.entries(body).filter(([key]) => allowed.includes(key))
   )
   if ('email' in dto) dto.email = normalizeEmail(dto.email)
+  if ('ecclesiasticalRoles' in dto) dto.ecclesiasticalRoles = ecclesiasticalRoles(dto.ecclesiasticalRoles)
   return dto
 }
 
