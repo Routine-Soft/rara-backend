@@ -21,6 +21,16 @@ async function issueSession(user, { viaGoogle = false } = {}) {
     return { accessToken, refreshToken, user: user.toJSON(), viaGoogle }
 }
 
+// Total de membros (não usuários) salvo em cada igreja: recontado sempre que
+// alguém vira/deixa de ser membro, troca de igreja, entra ou é apagado.
+export async function syncChurchMembers(...churchIds) {
+    const ids = [...new Set(churchIds.filter(Boolean).map(String))]
+    await Promise.all(ids.map(async (churchId) => {
+        const total = await UserModel.countDocuments({ churchId, member: true })
+        await ChurchModel.updateOne({ _id: churchId }, { $set: { totalMembers: total } })
+    }))
+}
+
 function escapeRegex(text) {
     return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
@@ -234,7 +244,9 @@ export const UserService = {
             userDTO.memberSince = new Date()
         }
 
-        return await UserModel.findByIdAndUpdate(id, { $set: userDTO }, { new: true, runValidators: true })
+        const updated = await UserModel.findByIdAndUpdate(id, { $set: userDTO }, { new: true, runValidators: true })
+        await syncChurchMembers(current.churchId, updated.churchId)
+        return updated
     },
 
     async deleteUser(id) {
@@ -242,6 +254,7 @@ export const UserService = {
         if (!user) {
             throw new AppError('User not found', 404)
         }
+        await syncChurchMembers(user.churchId)
         return null
     },
 

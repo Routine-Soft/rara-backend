@@ -1,3 +1,4 @@
+import mongoose from 'mongoose'
 import MidiaLocalModel from '../models/midialocal.model.js'
 import ChurchModel from '../models/church.model.js'
 import { createMidiaLocalDTO, updateMidiaLocalDTO } from '../dtos/midialocal.dto.js'
@@ -5,7 +6,19 @@ import AppError from '../errors/AppError.js'
 
 export const MidiaLocalService = {
     async findAll() {
-        return await MidiaLocalModel.find().populate('churchId')
+        return await MidiaLocalModel.find().sort({ order: 1, createdAt: 1 }).populate('churchId')
+    },
+
+    // Grava a nova ordem: ids na sequência em que devem aparecer
+    async reorder(body) {
+        const ids = body?.ids
+        if (!Array.isArray(ids) || !ids.every((id) => mongoose.isValidObjectId(id))) {
+            throw new AppError('Envie a lista de ids na nova ordem', 400)
+        }
+        await MidiaLocalModel.bulkWrite(ids.map((id, index) => ({
+            updateOne: { filter: { _id: id }, update: { $set: { order: index } } },
+        })))
+        return this.findAll()
     },
 
     async findById(id) {
@@ -26,6 +39,9 @@ export const MidiaLocalService = {
             }
         }
 
+        // Novo card entra no fim da lista
+        const last = await MidiaLocalModel.findOne().sort({ order: -1 })
+        midiaLocalDTO.order = (last?.order ?? -1) + 1
         return await MidiaLocalModel.create(midiaLocalDTO)
     },
 

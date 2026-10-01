@@ -1,3 +1,12 @@
+import { ECCLESIASTICAL_ROLES } from '../models/user.model.js'
+
+// Só cargos eclesiásticos válidos, sem repetir
+function ecclesiasticalRoles(value) {
+    return Array.isArray(value)
+        ? [...new Set(value.filter((r) => ECCLESIASTICAL_ROLES.includes(r)))]
+        : []
+}
+
 // Email sem espaços e minúsculo (o login compara exato)
 function normalizeEmail(email) {
     return typeof email === 'string' ? email.replace(/\s/g, '').toLowerCase() : email
@@ -81,6 +90,7 @@ export function createFacilitatorUserDTO(body) {
         member: false,
         roles: [],
         facilitator: body.facilitator ?? 'Não possui',
+        ecclesiasticalRoles: ecclesiasticalRoles(body.ecclesiasticalRoles),
     }
 }
 
@@ -90,8 +100,11 @@ export function updateFacilitatorUserDTO(body) {
         'status',
         'baptized',
         'facilitator',
+        'ecclesiasticalRoles',
     ]
-      return Object.fromEntries(
-    Object.entries(body).filter(([key]) => allowed.includes(key))
-  )
+    const dto = Object.fromEntries(
+        Object.entries(body).filter(([key]) => allowed.includes(key))
+    )
+    if ('ecclesiasticalRoles' in dto) dto.ecclesiasticalRoles = ecclesiasticalRoles(dto.ecclesiasticalRoles)
+    return dto
 }

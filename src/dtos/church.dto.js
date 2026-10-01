@@ -7,7 +7,7 @@ export function createChurchDTO(body) {
         address: body.address ?? {},
         cnpj: body.cnpj,
         logoUrl: body.logoUrl,
-        totalMembers: body.totalMembers ?? 0,
+        // totalMembers é calculado (syncChurchMembers), não vem do formulário
     }
 }
 
@@ -20,7 +20,6 @@ export function updateChurchDTO(body) {
         'address',
         'cnpj',
         'logoUrl',
-        'totalMembers',
     ]
 
     return Object.fromEntries(

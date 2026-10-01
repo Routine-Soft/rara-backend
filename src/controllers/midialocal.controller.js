@@ -28,4 +28,9 @@ export const MidiaLocalController = {
         await MidiaLocalService.deleteMidiaLocal(id)
         return reply.send({ success: true, data: null, message: 'Midia local deleted successfully' })
     },
+
+    async reorder(req, reply) {
+        const midiaLocals = await MidiaLocalService.reorder(req.body)
+        return reply.send({ success: true, data: midiaLocals, message: 'Order updated successfully' })
+    },
 }

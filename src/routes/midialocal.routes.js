@@ -15,6 +15,13 @@ export async function midiaLocalRoutes(fastify) {
                     'midia_lider'
                 ])
             }, MidiaLocalController.createMidiaLocal)
+        fastify.put('/midialocal/order', {
+                preHandler: authorize([
+                    'super_admin',
+                    'pastor_local',
+                    'midia_lider'
+                ])
+            }, MidiaLocalController.reorder)
         fastify.patch('/midialocal/:id', {
                 preHandler: authorize([
                     'super_admin',

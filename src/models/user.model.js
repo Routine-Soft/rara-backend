@@ -16,6 +16,9 @@ const addressSchema = new mongoose.Schema(
     }
 )
 
+// Cargos eclesiásticos (a pessoa pode ter vários)
+export const ECCLESIASTICAL_ROLES = ['pastor', 'presbitero', 'apostolo', 'diacono', 'obreiro', 'evangelista']
+
 // Resultado de um Teste dos Dons (guarda o último de cada teste)
 const giftTestResultSchema = new mongoose.Schema(
     {
@@ -93,6 +96,7 @@ const userSchema = new mongoose.Schema({
     // Senha provisória ("123", do cadastro pelo facilitador): o app pede a troca
     mustChangePassword: { type: Boolean, default: false },
     giftTests: { type: [giftTestResultSchema], default: [] },
+    ecclesiasticalRoles: [{ type: String, enum: ECCLESIASTICAL_ROLES }],
 
     token: { type: String, required: false },
     tokenRefresh: { type: String, required: false },

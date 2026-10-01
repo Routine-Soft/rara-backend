@@ -11,6 +11,8 @@ const midiaLocalSchema = new mongoose.Schema({
       required: false
   },
   image: { type: String, required: false },
+  // Posição na Agenda Semanal (a Mídia Liderança arrasta para reordenar)
+  order: { type: Number, default: 0 },
 
 }, { timestamps: true }); // Cria campos automáticos de createdAt e updatedAt
 
