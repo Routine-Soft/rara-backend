@@ -34,7 +34,9 @@ export function authorize(allowedRoles = []) {
         }
 
         const roles = Array.isArray(user.roles) ? user.roles : []
-        const hasAccess = roles.some(role => allowedRoles.includes(role))
+        // super_admin (Super Intendente Geral) acessa tudo
+        const hasAccess = roles.includes('super_admin') ||
+            roles.some(role => allowedRoles.includes(role))
 
         if (!hasAccess) {
             throw new AppError('Forbidden', 403)

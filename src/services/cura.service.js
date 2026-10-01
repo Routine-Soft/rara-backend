@@ -4,7 +4,7 @@ import UserModel from '../models/user.model.js'
 import AppError from '../errors/AppError.js'
 import { createCuraDTO, updateCuraDTO, updateStatusDTO } from '../dtos/cura.dto.js'
 
-const VALID_STATUSES = ['fila_espera', 'andamento', 'concluido']
+const VALID_STATUSES = ['fila_espera', 'andamento', 'concluido', 'interrompido']
 
 export const CuraService = {
     async create(body, userId) {
@@ -13,7 +13,7 @@ export const CuraService = {
 
         const activeRequest = await CuraModel.findOne({
             userId,
-            status: { $ne: 'concluido' },
+            status: { $nin: ['concluido', 'interrompido', 'cancelado'] },
         })
 
         if (activeRequest) {
@@ -54,6 +54,19 @@ export const CuraService = {
     // visão do paciente: só os pedidos dele
     async findByUser(userId) {
         return await CuraModel.find({ userId }).sort({ createdAt: -1 })
+    },
+
+    // o próprio membro cancela o pedido; fica registrado como 'cancelado'
+    async cancel(id, userId) {
+        const careRequest = await CuraModel.findOne({ _id: id, userId })
+        if (!careRequest) throw new AppError('Care request not found', 404)
+        if (['concluido', 'interrompido', 'cancelado'].includes(careRequest.status)) {
+            throw new AppError('Care request is already finished', 409)
+        }
+
+        careRequest.status = 'cancelado'
+        careRequest.cancelledAt = new Date()
+        return await careRequest.save()
     },
 
     async findById(id, authUser) {
@@ -100,6 +113,8 @@ export const CuraService = {
         } else {
             dto.completedAt = null
         }
+        // o gestor reabrindo um pedido cancelado limpa o cancelamento
+        dto.cancelledAt = null
 
         const query = { _id: id }
         if (!scope.isSuperAdmin) query.churchId = scope.churchId
@@ -131,7 +146,7 @@ export const CuraService = {
             { $group: { _id: '$status', count: { $sum: 1 } } },
         ])
 
-        const summary = { fila_espera: 0, andamento: 0, concluido: 0 }
+        const summary = { fila_espera: 0, andamento: 0, concluido: 0, interrompido: 0, cancelado: 0 }
         result.forEach(r => { summary[r._id] = r.count })
         return summary
     },

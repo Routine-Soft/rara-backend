@@ -1,3 +1,8 @@
+// Email sem espaços e minúsculo (o login compara exato)
+function normalizeEmail(email) {
+    return typeof email === 'string' ? email.replace(/\s/g, '').toLowerCase() : email
+}
+
 // DTO (Data Transfer Object) for creating a user
 export function createUserDTO(body) {
     return {
@@ -5,14 +10,15 @@ export function createUserDTO(body) {
         phone: body.phone,
         gender: body.gender,
         birthdate: body.birthdate,
-        email: body.email,
+        email: normalizeEmail(body.email),
         password: body.password,
         churchId: body.churchId,
         address: body.address ?? {},
         invitationofgrace: body.invitationofgrace ?? 'Não preencheu',
         status: body.status ?? 'Presente',
         baptized: body.baptized ?? false,
-        member: body.member ?? false,
+        // Virar membro é só pelo Avançai Liderança (PATCH /users/:id)
+        member: false,
         facilitator: body.facilitator ?? 'Não possui',
         roles: [],
     }
@@ -33,10 +39,13 @@ export function updateUserDTO(body) {
         'status',
         'baptized',
         'member',
+        'memberSince',
     ]
-  return Object.fromEntries(
+  const dto = Object.fromEntries(
     Object.entries(body).filter(([key]) => allowed.includes(key))
   )
+  if ('email' in dto) dto.email = normalizeEmail(dto.email)
+  return dto
 }
 
 export function updateUserRolesDTO(body) {
@@ -51,7 +60,7 @@ export function updateUserRolesDTO(body) {
 // DTO for user login
 export function loginUserDTO(body) {
     return {
-        email: body.email,
+        email: normalizeEmail(body.email),
         password: body.password,
     }
 }
@@ -62,13 +71,14 @@ export function createFacilitatorUserDTO(body) {
         phone: body.phone,
         gender: body.gender,
         birthdate: body.birthdate,
-        email: body.email,
+        email: normalizeEmail(body.email),
         churchId: body.churchId,
         address: body.address ?? {},
         invitationofgrace: body.invitationofgrace,
         status: body.status,
         baptized: body.baptized,
-        member: body.member ?? false,
+        // Virar membro é só pelo Avançai Liderança (PATCH /users/:id)
+        member: false,
         roles: [],
         facilitator: body.facilitator ?? 'Não possui',
     }

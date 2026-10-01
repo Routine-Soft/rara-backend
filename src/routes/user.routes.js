@@ -6,6 +6,7 @@ export async function userRoutes(fastify) {
     // public routes
     fastify.post('/users', UserController.createUser);
     fastify.post('/users/login', UserController.loginUser);
+    fastify.post('/users/google', UserController.googleLogin);
     fastify.post('/users/refresh', UserController.refreshToken);
 
     fastify.register(async function (fastify) {
@@ -22,7 +23,8 @@ export async function userRoutes(fastify) {
                     'departamento_lider',
                     'christian_group_lider',
                     'facilitador',
-                    'secretaria_cura'
+                    'secretaria_cura',
+                    'tesouraria'
                 ])
             }, UserController.getAllUsers);
         fastify.get('/users/:id', UserController.getUserById);

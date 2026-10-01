@@ -9,13 +9,16 @@ import { christianGroupRoutes } from "./src/routes/christiangroup.routes.js";
 import { lessonRoutes } from "./src/routes/lesson.routes.js";
 import { lessonProgressRoutes } from "./src/routes/lessonProgress.routes.js";
 import { curaRoutes } from "./src/routes/cura.routes.js";
+import { dizimoOfertaRoutes } from "./src/routes/dizimoOferta.routes.js";
+import { paymentSettingsRoutes } from "./src/routes/paymentSettings.routes.js";
+import { giftTestRoutes } from "./src/routes/giftTest.routes.js";
 
 dotenv.config();
 const fastify = Fastify({ logger: true })
 
 await fastify.register(fastifyCors, {            // 👈
   origin: true,                           // libera qualquer origem (em prod troca pelo domínio)
-  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 })
 
@@ -41,6 +44,9 @@ await fastify.register(christianGroupRoutes, {prefix: '/api'});
 await fastify.register(lessonRoutes, {prefix: '/api'});
 await fastify.register(lessonProgressRoutes, {prefix: '/api'});
 await fastify.register(curaRoutes, {prefix: '/api'});
+await fastify.register(dizimoOfertaRoutes, {prefix: '/api'});
+await fastify.register(paymentSettingsRoutes, {prefix: '/api'});
+await fastify.register(giftTestRoutes, {prefix: '/api'});
 
 // Conexão com MongoDB e start do servidor
 const start = async () => {

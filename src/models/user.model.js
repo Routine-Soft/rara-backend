@@ -3,6 +3,8 @@ import mongoose from 'mongoose'
 const addressSchema = new mongoose.Schema(
     {
         address: { type: String, required: false },
+        number: { type: String, required: false },
+        complement: { type: String, required: false },
         cep: { type: String, required: false },
         neighborhood: { type: String, required: false },
         city: { type: String, required: false },
@@ -12,6 +14,21 @@ const addressSchema = new mongoose.Schema(
     {
         _id: false,
     }
+)
+
+// Resultado de um Teste dos Dons (guarda o último de cada teste)
+const giftTestResultSchema = new mongoose.Schema(
+    {
+        test: { type: String, required: true }, // 'dons1' | 'dons2'
+        answers: [{ type: Number, min: 0, max: 5 }],
+        scores: [{
+            _id: false,
+            gift: { type: String, required: true },
+            score: { type: Number, required: true },
+        }],
+        completedAt: { type: Date, default: Date.now },
+    },
+    { _id: false }
 )
 
 // Definindo o esquema do usuário
@@ -48,13 +65,15 @@ const userSchema = new mongoose.Schema({
         enum: [
             "Presente",
             "Ausente",
-            "Foi embora"
+            "Se desligou do ministério"
         ],
         required: false
     },
     baptized: { type: Boolean, default: false, required: false },
 
     member: { type: Boolean, default: false, required: false },
+    // Quando virou membro (preenchido/limpo sozinho ao mudar `member`)
+    memberSince: { type: Date, required: false, default: null },
     roles: [{
         type: String,
         enum: [
@@ -65,10 +84,15 @@ const userSchema = new mongoose.Schema({
         "avancai_lider",
         "midia_lider",
         "pastor_local",
+        "tesouraria",
         "super_admin",
+        "programador",
         ]
     }],
     facilitator: { type: String, required: false },
+    // Senha provisória ("123", do cadastro pelo facilitador): o app pede a troca
+    mustChangePassword: { type: Boolean, default: false },
+    giftTests: { type: [giftTestResultSchema], default: [] },
 
     token: { type: String, required: false },
     tokenRefresh: { type: String, required: false },
@@ -80,6 +104,8 @@ const userSchema = new mongoose.Schema({
 // Nunca retornar a senha no JSON
 userSchema.methods.toJSON = function () {
   const obj = this.toObject()
+  // Conta criada pelo Google começa sem senha (o app mostra "Criar senha")
+  obj.hasPassword = !!obj.password
   delete obj.password
   delete obj.token
   delete obj.tokenRefresh

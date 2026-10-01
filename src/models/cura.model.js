@@ -15,7 +15,7 @@ const curaSchema = new mongoose.Schema({
     status: {
         type: String,
         required: true,
-        enum: ['fila_espera', 'andamento', 'concluido'],
+        enum: ['fila_espera', 'andamento', 'concluido', 'interrompido', 'cancelado'],
         default: 'fila_espera',
     },
     assignedTo: {
@@ -30,6 +30,7 @@ const curaSchema = new mongoose.Schema({
         required: false
     },
     completedAt: { type: Date, required: false },
+    cancelledAt: { type: Date, required: false }, // quando o próprio membro cancelou
 }, { timestamps: true })
 
 const CuraModel = mongoose.models.Cura || mongoose.model('Cura', curaSchema)

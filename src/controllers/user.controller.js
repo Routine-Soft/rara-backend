@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken'
 
 export const UserController = {
     async getAllUsers(req, reply) {
-        const users = await UserService.findAll()
+        const users = await UserService.findAll(req.user, req.query)
         return reply.send({ success: true, data: users, message: `Found ${users.length} users` })
     },
 
@@ -20,7 +20,7 @@ export const UserController = {
 
     async updateUser(req, reply) {
         const { id } = req.params
-        const user = await UserService.updateUser(id, req.body)
+        const user = await UserService.updateUser(id, req.body, req.user)
         return reply.send({ success: true, data: user, message: 'User updated successfully' })
     },
 
@@ -41,6 +41,11 @@ export const UserController = {
         return reply.send({ success: true, data: result, message: 'Login successful' })
     },
 
+    async googleLogin(req, reply) {
+        const result = await UserService.googleLogin(req.body)
+        return reply.send({ success: true, data: result, message: 'Login successful' })
+    },
+
     async logoutUser(req, reply) {
         await UserService.logoutUser(req.user.id)
         return reply.send({ success: true, data: null, message: 'Logout successful' })
@@ -54,18 +59,18 @@ export const UserController = {
 
     async updatePassword(req, reply) {
         const { id } = req.params
-        await UserService.updatePassword(id, req.body);
+        await UserService.updatePassword(id, req.body, req.user);
         return reply.send({ success: true, data: null, message: 'Password updated successfully' })
     },
 
     async createFacilitatorUser(req, reply) {
-        const user = await UserService.createFacilitatorUser(req.body)
+        const user = await UserService.createFacilitatorUser(req.body, req.user)
         return reply.code(201).send({ success: true, data: user, message: 'Facilitator created successfully' })
     },
 
     async updateFacilitatorUser(req, reply) {
         const { id } = req.params
-        const user = await UserService.updateFacilitatorUser(id, req.body)
+        const user = await UserService.updateFacilitatorUser(id, req.body, req.user)
         return reply.send({ success: true, data: user, message: 'Facilitator updated successfully' })
     },
 }

@@ -11,11 +11,11 @@ const lessonSchema = new mongoose.Schema({
     module: {
         type: String,
         required: true,
-        enum: ['reset', 'start', 'cdv'],
+        enum: ['historia', 'reset', 'start', 'cdv'],
     },
     number: { type: Number, required: true }, // ordem dentro do módulo (1, 2, 3...)
     title: { type: String, required: true },
-    videoUrl: { type: String, required: true },
+    videoUrl: { type: String, required: false, default: '' }, // opcional
     content: { type: String, required: true }, // o texto que hoje está no .tsx
     image: { type: String, required: false }, // agora é URL (S3/Cloudinary), não require() local
     questions: { type: [questionSchema], default: [] },

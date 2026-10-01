@@ -3,6 +3,8 @@ import mongoose from 'mongoose'
 const addressSchema = new mongoose.Schema(
     {
         address: { type: String, required: false },
+        number: { type: String, required: false },
+        complement: { type: String, required: false },
         cep: { type: String, required: false },
         neighborhood: { type: String, required: false },
         city: { type: String, required: false },

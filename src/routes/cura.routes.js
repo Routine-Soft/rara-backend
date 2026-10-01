@@ -12,6 +12,7 @@ export async function curaRoutes(fastify) {
         // lado do paciente
         fastify.post('/cura', CuraController.create)
         fastify.get('/cura/me', CuraController.getMine)
+        fastify.patch('/cura/:id/cancel', CuraController.cancel) // só o dono do pedido
 
         // lado do gestor (pastor / admin / secretaria) — Kanban
         fastify.get('/cura', { preHandler: managers }, CuraController.getAll)               // lista tudo, filtra por status/type

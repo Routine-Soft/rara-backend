@@ -15,7 +15,7 @@ export function createLessonDTO(body) {
         module: body.module,
         number: body.number,
         title: body.title,
-        videoUrl: body.videoUrl,
+        videoUrl: body.videoUrl ?? '',
         content: body.content,
         image: body.image ?? null,
         questions: normalizeQuestions(body.questions),

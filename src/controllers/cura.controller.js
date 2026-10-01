@@ -18,6 +18,11 @@ export const CuraController = {
         return reply.send({ success: true, data: requests, message: `Found ${requests.length} of your care requests` })
     },
 
+    async cancel(request, reply) {
+        const careRequest = await CuraService.cancel(request.params.id, request.user.id)
+        return reply.send({ success: true, data: careRequest, message: 'Care request cancelled successfully' })
+    },
+
     async getById(request, reply) {
         const careRequest = await CuraService.findById(request.params.id, request.user)
         return reply.send({ success: true, data: careRequest, message: 'Care request retrieved successfully' })
