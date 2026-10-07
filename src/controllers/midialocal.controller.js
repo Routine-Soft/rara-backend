@@ -2,7 +2,7 @@ import { MidiaLocalService } from '../services/midialocal.service.js'
 
 export const MidiaLocalController = {
     async getAllMidiaLocals(req, reply) {
-        const midiaLocals = await MidiaLocalService.findAll()
+        const midiaLocals = await MidiaLocalService.findAll(req.user)
         return reply.send({ success: true, data: midiaLocals, message: `Found ${midiaLocals.length} midia locals` })
     },
 
@@ -13,24 +13,24 @@ export const MidiaLocalController = {
     },
 
     async createMidiaLocal(req, reply) {
-        const midiaLocal = await MidiaLocalService.createMidiaLocal(req.body)
+        const midiaLocal = await MidiaLocalService.createMidiaLocal(req.body, req.user)
         return reply.code(201).send({ success: true, data: midiaLocal, message: 'Midia local created successfully' })
     },
 
     async updateMidiaLocal(req, reply) {
         const { id } = req.params
-        const midiaLocal = await MidiaLocalService.updateMidiaLocal(id, req.body)
+        const midiaLocal = await MidiaLocalService.updateMidiaLocal(id, req.body, req.user)
         return reply.send({ success: true, data: midiaLocal, message: 'Midia local updated successfully' })
     },
 
     async deleteMidiaLocal(req, reply) {
         const { id } = req.params
-        await MidiaLocalService.deleteMidiaLocal(id)
+        await MidiaLocalService.deleteMidiaLocal(id, req.user)
         return reply.send({ success: true, data: null, message: 'Midia local deleted successfully' })
     },
 
     async reorder(req, reply) {
-        const midiaLocals = await MidiaLocalService.reorder(req.body)
+        const midiaLocals = await MidiaLocalService.reorder(req.body, req.user)
         return reply.send({ success: true, data: midiaLocals, message: 'Order updated successfully' })
     },
 }
