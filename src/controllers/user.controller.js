@@ -32,7 +32,7 @@ export const UserController = {
 
     async deleteUser(req, reply) {
         const { id } = req.params
-        await UserService.deleteUser(id)
+        await UserService.deleteUser(id, req.user)
         return reply.send({ success: true, data: null, message: 'User deleted successfully' })
     },
     
@@ -72,5 +72,12 @@ export const UserController = {
         const { id } = req.params
         const user = await UserService.updateFacilitatorUser(id, req.body, req.user)
         return reply.send({ success: true, data: user, message: 'Facilitator updated successfully' })
+    },
+
+    async setTeam(req, reply) {
+        const { id, team } = req.params
+        const add = req.method === 'PUT'
+        const user = await UserService.setTeam(id, team, add, req.user)
+        return reply.send({ success: true, data: user, message: add ? 'Added to team' : 'Removed from team' })
     },
 }

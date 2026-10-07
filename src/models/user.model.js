@@ -88,8 +88,16 @@ const userSchema = new mongoose.Schema({
         "midia_lider",
         "pastor_local",
         "tesouraria",
+        "secretaria_igreja",
         "super_admin",
         "programador",
+        // equipes dos departamentos (mesmos poderes do líder)
+        "avancai_equipe",
+        "christian_group_equipe",
+        "midia_equipe",
+        "cura_equipe",
+        "tesouraria_equipe",
+        "facilitadores_equipe",
         ]
     }],
     facilitator: { type: String, required: false },

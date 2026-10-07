@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken'
 import AppError from '../../errors/AppError.js'
 import UserModel from '../../models/user.model.js'
+import { expandRoles } from '../../utils/teams.js'
 
 export async function authenticate(req, reply) {
     const authHeader = req.headers.authorization
@@ -33,7 +34,8 @@ export function authorize(allowedRoles = []) {
             throw new AppError('User not found', 404)
         }
 
-        const roles = Array.isArray(user.roles) ? user.roles : []
+        // Equipe do departamento vale como o líder (utils/teams.js)
+        const roles = expandRoles(Array.isArray(user.roles) ? user.roles : [])
         // super_admin (Super Intendente Geral) acessa tudo
         const hasAccess = roles.includes('super_admin') ||
             roles.some(role => allowedRoles.includes(role))

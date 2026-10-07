@@ -3,10 +3,14 @@ import jwt from 'jsonwebtoken'
 import mongoose from 'mongoose'
 import UserModel from '../models/user.model.js'
 import ChurchModel from '../models/church.model.js'
+import DizimoOfertaModel from '../models/dizimoOferta.model.js'
+import LessonProgressModel from '../models/lessonProgress.model.js'
+import CuraModel from '../models/cura.model.js'
 import { createUserDTO, updateUserDTO, loginUserDTO, createFacilitatorUserDTO, updateFacilitatorUserDTO, updateUserRolesDTO } from '../dtos/user.dto.js'
 import { verify } from 'node:crypto'
 import AppError from '../errors/AppError.js'
 import { OAuth2Client } from 'google-auth-library'
+import { TEAMS, expandRoles, canManageTeam } from '../utils/teams.js'
 
 const googleClient = new OAuth2Client()
 
@@ -42,7 +46,7 @@ const PROVISIONAL_PASSWORD = '123'
 export const GLOBAL_ROLES = ['super_admin', 'programador']
 
 // Quem pode marcar/desmarcar membro e editar outros usuários da igreja
-const MEMBER_MANAGERS = ['super_admin', 'pastor_local', 'avancai_lider']
+const MEMBER_MANAGERS = ['super_admin', 'pastor_local', 'secretaria_igreja', 'avancai_lider']
 
 export const UserService = {
     // super_admin vê todas as igrejas (ou a escolhida); os demais só a própria
@@ -171,6 +175,36 @@ export const UserService = {
         return targetUser
     },
 
+    // "Tornar membro da equipe" (aba Minha Equipe): o líder do departamento
+    // (ou pastor local / secretária da igreja / super_admin) põe ou tira a
+    // pessoa da equipe. Só pessoas da mesma igreja.
+    async setTeam(id, key, add, authUser) {
+        if (!mongoose.isValidObjectId(id)) throw new AppError('Invalid user id', 400)
+        const team = TEAMS[key]
+        if (!team) throw new AppError('Equipe não encontrada', 404)
+
+        const [logged, target] = await Promise.all([
+            UserModel.findById(authUser.id),
+            UserModel.findById(id),
+        ])
+        if (!logged) throw new AppError('Authenticated user not found', 404)
+        if (!target) throw new AppError('User not found', 404)
+
+        const loggedRoles = logged.roles ?? []
+        if (!canManageTeam(loggedRoles, key)) {
+            throw new AppError('Só o líder do departamento monta a equipe', 403)
+        }
+        const sameChurch = logged.churchId && String(logged.churchId) === String(target.churchId)
+        if (!loggedRoles.includes('super_admin') && !sameChurch) {
+            throw new AppError('Você só pode montar a equipe com pessoas da sua igreja', 403)
+        }
+
+        const roles = (target.roles ?? []).filter((r) => r !== team.team)
+        target.roles = add ? [...roles, team.team] : roles
+        await target.save()
+        return target
+    },
+
     // Integração só de pessoas da própria igreja (super_admin: qualquer uma)
     async updateFacilitatorUser(id, body, authUser) {
         if (!mongoose.isValidObjectId(id)) throw new AppError('Invalid user id', 400)
@@ -208,7 +242,7 @@ export const UserService = {
         if (!logged) throw new AppError('Authenticated user not found', 404)
         if (!current) throw new AppError('User not found', 404)
 
-        const loggedRoles = logged.roles ?? []
+        const loggedRoles = expandRoles(logged.roles ?? [])
         const isSuperAdmin = loggedRoles.includes('super_admin')
         const isLeader = MEMBER_MANAGERS.some(role => loggedRoles.includes(role))
         const isSelf = String(logged._id) === String(current._id)
@@ -261,11 +295,41 @@ export const UserService = {
         return updated
     },
 
-    async deleteUser(id) {
-        const user = await UserModel.findByIdAndDelete(id)
-        if (!user) {
-            throw new AppError('User not found', 404)
+    // Excluir: super_admin qualquer um; pastor local e facilitador só pessoas
+    // da própria igreja. Ninguém exclui a si mesmo, e só super_admin exclui
+    // outro super_admin.
+    async deleteUser(id, authUser) {
+        if (!mongoose.isValidObjectId(id)) throw new AppError('Invalid user id', 400)
+        const [logged, user] = await Promise.all([
+            UserModel.findById(authUser.id),
+            UserModel.findById(id),
+        ])
+        if (!logged) throw new AppError('Authenticated user not found', 404)
+        if (!user) throw new AppError('User not found', 404)
+
+        const isSuperAdmin = (logged.roles ?? []).includes('super_admin')
+        if (String(logged._id) === String(user._id)) {
+            throw new AppError('Você não pode excluir a sua própria conta por aqui', 403)
         }
+        if (!isSuperAdmin) {
+            const sameChurch = logged.churchId && String(logged.churchId) === String(user.churchId)
+            if (!sameChurch) throw new AppError('Você só pode excluir pessoas da sua igreja', 403)
+            if ((user.roles ?? []).includes('super_admin')) {
+                throw new AppError('Só o Super Intendente Geral exclui outro Super Intendente', 403)
+            }
+        }
+
+        // Contribuições são registro financeiro: ficam, com o nome da pessoa.
+        // Progresso das aulas e pedidos de Cura saem junto.
+        await Promise.all([
+            DizimoOfertaModel.updateMany(
+                { userId: user._id, $or: [{ donorName: null }, { donorName: '' }] },
+                { $set: { donorName: user.name } }
+            ),
+            LessonProgressModel.deleteMany({ userId: user._id }),
+            CuraModel.deleteMany({ userId: user._id }),
+        ])
+        await UserModel.deleteOne({ _id: user._id })
         await syncChurchMembers(user.churchId)
         return null
     },

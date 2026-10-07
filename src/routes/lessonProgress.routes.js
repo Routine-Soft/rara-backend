@@ -9,6 +9,7 @@ export async function lessonProgressRoutes(fastify) {
                 preHandler: authorize([
                     'super_admin',
                     'pastor_local',
+                    'secretaria_igreja',
                     'avancai_lider',
                     'departamento_lider',
                     'christian_group_lider',

@@ -12,6 +12,7 @@ export async function midiaLocalRoutes(fastify) {
                 preHandler: authorize([
                     'super_admin',
                     'pastor_local',
+                    'secretaria_igreja',
                     'midia_lider'
                 ])
             }, MidiaLocalController.createMidiaLocal)
@@ -19,6 +20,7 @@ export async function midiaLocalRoutes(fastify) {
                 preHandler: authorize([
                     'super_admin',
                     'pastor_local',
+                    'secretaria_igreja',
                     'midia_lider'
                 ])
             }, MidiaLocalController.reorder)
@@ -26,6 +28,7 @@ export async function midiaLocalRoutes(fastify) {
                 preHandler: authorize([
                     'super_admin',
                     'pastor_local',
+                    'secretaria_igreja',
                     'midia_lider'
                 ])
             }, MidiaLocalController.updateMidiaLocal)
@@ -33,6 +36,7 @@ export async function midiaLocalRoutes(fastify) {
                 preHandler: authorize([
                     'super_admin',
                     'pastor_local',
+                    'secretaria_igreja',
                     'midia_lider'
                 ])
             }, MidiaLocalController.deleteMidiaLocal)

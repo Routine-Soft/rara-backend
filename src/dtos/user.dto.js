@@ -30,6 +30,7 @@ export function createUserDTO(body) {
         member: false,
         facilitator: body.facilitator ?? 'Não possui',
         roles: [],
+        ecclesiasticalRoles: ecclesiasticalRoles(body.ecclesiasticalRoles),
     }
 }
 

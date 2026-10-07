@@ -6,6 +6,7 @@ import AppError from '../errors/AppError.js'
 import { declareDTO, checkoutDTO, manualDTO } from '../dtos/dizimoOferta.dto.js'
 import { MercadoPagoService } from './mercadoPago.service.js'
 import { PaymentSettingsService } from './paymentSettings.service.js'
+import PaymentSettingsModel from '../models/paymentSettings.model.js'
 
 const TZ = 'America/Sao_Paulo'
 function validId(id) {
@@ -71,6 +72,14 @@ export const DizimoOfertaService = {
     },
 
     // cria a contribuição pendente e o checkout do Mercado Pago
+    // O app só libera "Dizimar / Ofertar pelo app" se a igreja da pessoa
+    // tiver as chaves do Mercado Pago cadastradas (nada das chaves sai daqui)
+    async paymentAvailable(userId) {
+        const user = await UserModel.findById(userId)
+        if (!user?.churchId) return { available: false }
+        return { available: !!(await PaymentSettingsModel.exists({ churchId: user.churchId })) }
+    },
+
     async checkout(body, userId) {
         const { user, churchId } = await churchOf(userId)
         const credentials = await PaymentSettingsService.credentialsFor(churchId)

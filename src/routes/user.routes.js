@@ -19,12 +19,14 @@ export async function userRoutes(fastify) {
                 preHandler: authorize([
                     'super_admin',
                     'pastor_local',
+                    'secretaria_igreja',
                     'avancai_lider',
                     'departamento_lider',
                     'christian_group_lider',
                     'facilitador',
                     'secretaria_cura',
-                    'tesouraria'
+                    'tesouraria',
+                    'midia_lider'
                 ])
             }, UserController.getAllUsers);
         fastify.get('/users/:id', UserController.getUserById);
@@ -34,6 +36,7 @@ export async function userRoutes(fastify) {
                 preHandler: authorize([
                     'super_admin',
                     'pastor_local',
+                    'facilitador',
                 ])
             }, UserController.deleteUser);
         fastify.post('/users/logout', UserController.logoutUser);
@@ -41,6 +44,7 @@ export async function userRoutes(fastify) {
                 preHandler: authorize([
                     'super_admin',
                     'pastor_local',
+                    'secretaria_igreja',
                     'christian_group_lider',
                     'facilitador',
                 ])
@@ -49,14 +53,19 @@ export async function userRoutes(fastify) {
                 preHandler: authorize([
                     'super_admin',
                     'pastor_local',
+                    'secretaria_igreja',
                     'christian_group_lider',
                     'facilitador',
                 ])
             }, UserController.updateFacilitatorUser);
+        // Minha Equipe (as regras de quem pode ficam no service)
+        fastify.put('/users/:id/team/:team', UserController.setTeam);
+        fastify.delete('/users/:id/team/:team', UserController.setTeam);
         fastify.patch('/users/:id/roles', {
                 preHandler: authorize([
                     'super_admin',
                     'pastor_local',
+                    'secretaria_igreja',
                 ])
             }, UserController.updateUserRoles);
     })

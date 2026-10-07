@@ -3,7 +3,7 @@ import { CuraController } from '../controllers/cura.controller.js'
 import { authenticate, authorize } from './middleware/authMiddleware.js'
 
 // quem gerencia o Kanban de cura
-const managers = authorize(['super_admin', 'pastor_local', 'secretaria_cura'])
+const managers = authorize(['super_admin', 'pastor_local', 'secretaria_igreja', 'secretaria_cura'])
 
 export async function curaRoutes(fastify) {
     fastify.register(async function (fastify) {

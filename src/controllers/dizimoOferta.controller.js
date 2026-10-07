@@ -12,6 +12,11 @@ export const DizimoOfertaController = {
         return reply.status(201).send({ success: true, data, message: 'Contribution registered' })
     },
 
+    async paymentAvailable(request, reply) {
+        const data = await DizimoOfertaService.paymentAvailable(request.user.id)
+        return reply.send({ success: true, data, message: 'Payment availability' })
+    },
+
     async checkout(request, reply) {
         const data = await DizimoOfertaService.checkout(request.body ?? {}, request.user.id)
         return reply.status(201).send({ success: true, data, message: 'Checkout created' })

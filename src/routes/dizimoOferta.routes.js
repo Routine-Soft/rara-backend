@@ -3,7 +3,7 @@ import { DizimoOfertaController } from '../controllers/dizimoOferta.controller.j
 import { authenticate, authorize } from './middleware/authMiddleware.js'
 
 // quem vê o relatório e registra contribuições de outras pessoas
-const treasury = authorize(['super_admin', 'pastor_local', 'tesouraria'])
+const treasury = authorize(['super_admin', 'pastor_local', 'secretaria_igreja', 'tesouraria'])
 
 export async function dizimoOfertaRoutes(fastify) {
     // webhook do Mercado Pago: público (a autenticidade é conferida consultando
@@ -17,6 +17,7 @@ export async function dizimoOfertaRoutes(fastify) {
         fastify.get('/dizimo-oferta/me', DizimoOfertaController.getMine)
         fastify.post('/dizimo-oferta/me', DizimoOfertaController.declare)
         fastify.delete('/dizimo-oferta/me/:id', DizimoOfertaController.removeMine)
+        fastify.get('/dizimo-oferta/me/available', DizimoOfertaController.paymentAvailable)
         fastify.post('/dizimo-oferta/checkout', DizimoOfertaController.checkout)
 
         // tesouraria
