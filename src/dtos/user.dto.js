@@ -1,10 +1,10 @@
 import { ECCLESIASTICAL_ROLES } from '../models/user.model.js'
 
-// Só cargos eclesiásticos válidos, sem repetir
+// Só cargos eclesiásticos válidos, sem repetir ('nenhum' sai se vier junto com um cargo)
 function ecclesiasticalRoles(value) {
-    return Array.isArray(value)
-        ? [...new Set(value.filter((r) => ECCLESIASTICAL_ROLES.includes(r)))]
-        : []
+    if (!Array.isArray(value)) return []
+    const roles = [...new Set(value.filter((r) => ECCLESIASTICAL_ROLES.includes(r)))]
+    return roles.length > 1 ? roles.filter((r) => r !== 'nenhum') : roles
 }
 
 // Email sem espaços e minúsculo (o login compara exato)

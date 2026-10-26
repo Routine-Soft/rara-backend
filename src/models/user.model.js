@@ -16,8 +16,8 @@ const addressSchema = new mongoose.Schema(
     }
 )
 
-// Cargos eclesiásticos (a pessoa pode ter vários)
-export const ECCLESIASTICAL_ROLES = ['pastor', 'presbitero', 'apostolo', 'diacono', 'obreiro', 'evangelista']
+// Cargos eclesiásticos (a pessoa pode ter vários; 'nenhum' é para quem não tem cargo e não se mistura com os outros)
+export const ECCLESIASTICAL_ROLES = ['nenhum', 'pastor', 'presbitero', 'apostolo', 'diacono', 'obreiro', 'evangelista']
 
 // Resultado de um Teste dos Dons (guarda o último de cada teste)
 const giftTestResultSchema = new mongoose.Schema(
