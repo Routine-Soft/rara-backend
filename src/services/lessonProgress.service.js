@@ -9,8 +9,17 @@ import {
 import AppError from '../errors/AppError.js'
 
 export const LessonProgressService = {
-    async findAll() {
-        return await LessonProgressModel.find().populate('userId').populate('lessonId')
+    // Super admin vê o progresso de todas as igrejas; os demais, só da própria
+    async findAll(authUser) {
+        const logged = await UserModel.findById(authUser.id)
+        if (!logged) throw new AppError('Authenticated user not found', 404)
+
+        if ((logged.roles ?? []).includes('super_admin')) {
+            return await LessonProgressModel.find().populate('userId').populate('lessonId')
+        }
+        if (!logged.churchId) return []
+        const userIds = await UserModel.find({ churchId: logged.churchId }).distinct('_id')
+        return await LessonProgressModel.find({ userId: { $in: userIds } }).populate('userId').populate('lessonId')
     },
 
     async findById(id) {

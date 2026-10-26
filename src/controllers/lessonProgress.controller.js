@@ -2,7 +2,7 @@ import { LessonProgressService } from '../services/lessonProgress.service.js'
 
 export const LessonProgressController = {
     async getAllProgress(req, reply) {
-        const progress = await LessonProgressService.findAll()
+        const progress = await LessonProgressService.findAll(req.user)
         return reply.send({ success: true, data: progress, message: `Found ${progress.length} progress records` })
     },
 
